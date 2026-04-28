@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to release (e.g. v0.1.1)"
+        description: "Tag to release (e.g. v0.1.2)"
         required: true
 
 jobs:
@@ -67,10 +67,11 @@ jobs:
             patchelf
 
       - name: Install JS deps
-        run: bun install --frozen-lockfile || bun install
+        run: bun install
 
       - name: Build static frontend
-        run: bun --cwd apps/web run build
+        working-directory: apps/web
+        run: bun run build
 
       - name: Build & publish Tauri bundle
         uses: tauri-apps/tauri-action@v0
@@ -83,3 +84,144 @@ jobs:
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}
+
+  publish-managers:
+    name: Publish to Homebrew + Scoop
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Wait for release assets to settle
+        run: sleep 30
+
+      - name: Compute version + asset URLs
+        id: meta
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REF: ${{ github.ref_name || inputs.tag }}
+        run: |
+          set -euo pipefail
+          TAG="$REF"
+          VERSION="${TAG#v}"
+          OWNER_REPO="${GITHUB_REPOSITORY}"
+
+          fetch_url () {
+            local pattern="$1"
+            gh release view "$TAG" --repo "$OWNER_REPO" --json assets \
+              --jq ".assets[] | select(.name | test(\"$pattern\")) | .url" \
+              | head -1
+          }
+
+          DMG_ARM=$(fetch_url 'aarch64\\.dmg$|aarch64.*\\.dmg$')
+          DMG_X64=$(fetch_url 'x64\\.dmg$|x86_64\\.dmg$')
+          MSI=$(fetch_url '\\.msi$')
+
+          dl_sha () {
+            local url="$1"
+            [ -z "$url" ] && { echo ""; return; }
+            curl -sLf "$url" -o /tmp/asset || return 1
+            sha256sum /tmp/asset | awk '{print $1}'
+          }
+
+          SHA_ARM=$(dl_sha "$DMG_ARM" || true)
+          SHA_X64=$(dl_sha "$DMG_X64" || true)
+          SHA_MSI=$(dl_sha "$MSI" || true)
+
+          {
+            echo "tag=$TAG"
+            echo "version=$VERSION"
+            echo "dmg_arm=$DMG_ARM"
+            echo "dmg_x64=$DMG_X64"
+            echo "msi=$MSI"
+            echo "sha_arm=$SHA_ARM"
+            echo "sha_x64=$SHA_X64"
+            echo "sha_msi=$SHA_MSI"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Update Homebrew tap
+        if: steps.meta.outputs.sha_arm != '' || steps.meta.outputs.sha_x64 != ''
+        env:
+          GH_TOKEN: ${{ secrets.PUBLISHER_TOKEN }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          DMG_ARM: ${{ steps.meta.outputs.dmg_arm }}
+          DMG_X64: ${{ steps.meta.outputs.dmg_x64 }}
+          SHA_ARM: ${{ steps.meta.outputs.sha_arm }}
+          SHA_X64: ${{ steps.meta.outputs.sha_x64 }}
+        run: |
+          set -euo pipefail
+          [ -z "${GH_TOKEN:-}" ] && { echo "::warning::PUBLISHER_TOKEN not set; skipping Homebrew tap update"; exit 0; }
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/koughen/homebrew-editor.git" tap
+          mkdir -p tap/Casks
+          cat > tap/Casks/editor.rb <<EOF
+          cask "editor" do
+            version "${VERSION}"
+
+            on_arm do
+              url "${DMG_ARM}"
+              sha256 "${SHA_ARM}"
+            end
+
+            on_intel do
+              url "${DMG_X64}"
+              sha256 "${SHA_X64}"
+            end
+
+            name "Editor"
+            desc "Simple, powerful video editor for the desktop"
+            homepage "https://github.com/koughen/Editor"
+
+            app "Editor.app"
+
+            zap trash: [
+              "~/Library/Application Support/com.editor.desktop",
+              "~/Library/Preferences/com.editor.desktop.plist",
+              "~/Library/Caches/com.editor.desktop",
+            ]
+          end
+          EOF
+          cd tap
+          git config user.name "koughen-bot"
+          git config user.email "noreply@github.com"
+          git add Casks/editor.rb
+          git commit -m "editor ${VERSION}" || echo "no changes"
+          git push
+
+      - name: Update Scoop bucket
+        if: steps.meta.outputs.sha_msi != ''
+        env:
+          GH_TOKEN: ${{ secrets.PUBLISHER_TOKEN }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          MSI: ${{ steps.meta.outputs.msi }}
+          SHA_MSI: ${{ steps.meta.outputs.sha_msi }}
+        run: |
+          set -euo pipefail
+          [ -z "${GH_TOKEN:-}" ] && { echo "::warning::PUBLISHER_TOKEN not set; skipping Scoop bucket update"; exit 0; }
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/koughen/scoop-editor.git" bucket
+          mkdir -p bucket
+          cat > bucket/editor.json <<EOF
+          {
+            "version": "${VERSION}",
+            "description": "Simple, powerful video editor for the desktop",
+            "homepage": "https://github.com/koughen/Editor",
+            "license": "MIT",
+            "url": "${MSI}",
+            "hash": "${SHA_MSI}",
+            "shortcuts": [
+              ["Editor.exe", "Editor"]
+            ],
+            "checkver": "github",
+            "autoupdate": {
+              "url": "https://github.com/koughen/Editor/releases/download/v\$version/Editor_\$version_x64_en-US.msi"
+            }
+          }
+          EOF
+          cd bucket
+          git config user.name "koughen-bot"
+          git config user.email "noreply@github.com"
+          git add editor.json
+          git commit -m "editor ${VERSION}" || echo "no changes"
+          git push

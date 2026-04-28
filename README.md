@@ -29,18 +29,80 @@ Trim, layer, and export — fast.
 
 ---
 
-## Download
+## Install
 
-Grab the latest installer from [Releases](https://github.com/koughen/Editor/releases).
+### One-liners
 
-| Platform | Format |
-| --- | --- |
-| **Linux** (Debian / Ubuntu) | `.deb` |
-| **Linux** (Fedora / openSUSE) | `.rpm` |
-| **macOS** | build from source (see below) |
-| **Windows** | build from source (see below) |
+<table>
+<tr>
+  <th>macOS</th>
+  <td>
 
-> macOS and Windows builds aren't pre-bundled here yet — Tauri can't cross-compile, so each platform has to be built on its own machine. The build is one command.
+```sh
+brew install --cask koughen/editor/editor
+```
+
+  </td>
+</tr>
+<tr>
+  <th>Windows</th>
+  <td>
+
+```powershell
+scoop bucket add koughen https://github.com/koughen/scoop-editor
+scoop install koughen/editor
+```
+
+  </td>
+</tr>
+<tr>
+  <th>Linux (Arch / AUR)</th>
+  <td>
+
+Manual install via the `.AppImage` from [Releases](https://github.com/koughen/Editor/releases) — `chmod +x Editor*.AppImage && ./Editor*.AppImage`.
+
+  </td>
+</tr>
+<tr>
+  <th>Linux (Debian / Ubuntu)</th>
+  <td>
+
+```sh
+curl -L -o editor.deb $(gh release view --repo koughen/Editor --json assets --jq '.assets[] | select(.name | endswith(".deb")) | .url' | head -1)
+sudo apt install ./editor.deb
+```
+
+Or grab the `.deb` from [Releases](https://github.com/koughen/Editor/releases) and double-click.
+
+  </td>
+</tr>
+<tr>
+  <th>Linux (Fedora / openSUSE)</th>
+  <td>
+
+`.rpm` from [Releases](https://github.com/koughen/Editor/releases) — `sudo dnf install ./Editor-*.rpm`.
+
+  </td>
+</tr>
+</table>
+
+### Manual download
+
+All installers — `.dmg`, `.msi`, `.AppImage`, `.deb`, `.rpm` — live on the [Releases page](https://github.com/koughen/Editor/releases).
+
+#### "Editor cannot be opened because it's from an unidentified developer" (macOS)
+
+The `.dmg` isn't code-signed (signing certs cost $99/yr). One-time fix after dragging `Editor.app` to `/Applications`:
+
+```sh
+xattr -d com.apple.quarantine /Applications/Editor.app
+```
+
+Or right-click the app the first time you open it → **Open** → confirm. The Homebrew install above bypasses this automatically.
+
+#### "Windows protected your PC" (Windows)
+
+Click **More info → Run anyway**. Same reason — no Authenticode signing cert.
 
 <br />
 

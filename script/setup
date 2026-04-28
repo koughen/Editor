@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+# Editor — dev environment sanity check + dependency install.
+#
+# Run from the repo root:  ./script/setup
+#
+# Verifies bun, rust, and platform-native build dependencies are present,
+# then installs JS deps. Prints a summary so you know what's missing
+# before you spend ten minutes chasing a build error.
+
+set -euo pipefail
+
+bold ()  { printf "\033[1m%s\033[0m\n" "$*"; }
+ok ()    { printf "  \033[32m✓\033[0m %s\n" "$*"; }
+warn ()  { printf "  \033[33m!\033[0m %s\n" "$*"; }
+fail ()  { printf "  \033[31m✗\033[0m %s\n" "$*"; }
+
+bold "Editor — environment check"
+echo
+
+PROBLEMS=0
+
+need () {
+  local cmd="$1"
+  local hint="$2"
+  if command -v "$cmd" >/dev/null 2>&1; then
+    ok "$cmd ($($cmd --version 2>&1 | head -1))"
+  else
+    fail "$cmd missing — $hint"
+    PROBLEMS=$((PROBLEMS + 1))
+  fi
+}
+
+need bun "install: curl -fsSL https://bun.sh/install | bash"
+need cargo "install: https://rustup.rs"
+need git "install via your system package manager"
+
+OS="$(uname -s)"
+case "$OS" in
+  Linux*)
+    if pkg-config --exists webkit2gtk-4.1 2>/dev/null; then
+      ok "webkit2gtk-4.1 (system)"
+    else
+      fail "webkit2gtk-4.1 dev package missing"
+      warn "  Arch:   sudo pacman -S webkit2gtk-4.1 libsoup3 base-devel"
+      warn "  Debian: sudo apt install libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libsoup-3.0-dev patchelf"
+      PROBLEMS=$((PROBLEMS + 1))
+    fi
+    ;;
+  Darwin*)
+    if xcode-select -p >/dev/null 2>&1; then
+      ok "Xcode command line tools"
+    else
+      fail "Xcode command line tools missing — run: xcode-select --install"
+      PROBLEMS=$((PROBLEMS + 1))
+    fi
+    ;;
+  MINGW*|CYGWIN*|MSYS*)
+    ok "Windows detected (assumes WebView2 + MSVC build tools are present)"
+    ;;
+esac
+
+echo
+bold "Installing JS deps"
+bun install
+
+echo
+if [ "$PROBLEMS" -eq 0 ]; then
+  ok "Setup complete. Try:"
+  echo "    bun --cwd apps/web run dev -- -p 3001"
+else
+  fail "Setup finished with $PROBLEMS missing dependency(ies). Address them, then re-run ./script/setup."
+  exit 1
+fi
