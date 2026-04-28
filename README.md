@@ -21,6 +21,12 @@ Trim, layer, and export — fast.
 
 <br />
 
+<div align="center">
+  <img src="assets/screenshot-editor.png" alt="Editor — main view" width="100%" />
+</div>
+
+<br />
+
 ---
 
 ## Download

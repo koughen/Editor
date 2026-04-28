@@ -10,4 +10,4 @@ export const SITE_INFO = {
 	favicon: "/favicon.ico",
 };
 
-export const DEFAULT_LOGO_URL = "/logos/editor/mark-white.png";
+export const DEFAULT_LOGO_URL = "/logos/editor/heart-mark.png";
