@@ -1,0 +1,85 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (e.g. v0.1.1)"
+        required: true
+
+jobs:
+  build:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            label: macOS (Apple Silicon)
+            target: aarch64-apple-darwin
+            args: --target aarch64-apple-darwin
+          - platform: macos-latest
+            label: macOS (Intel)
+            target: x86_64-apple-darwin
+            args: --target x86_64-apple-darwin
+          - platform: ubuntu-22.04
+            label: Linux
+            target: ""
+            args: ""
+          - platform: windows-latest
+            label: Windows
+            target: ""
+            args: ""
+
+    runs-on: ${{ matrix.platform }}
+    name: Build — ${{ matrix.label }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache cargo
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: apps/tauri/src-tauri
+
+      - name: Install Linux deps
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            libsoup-3.0-dev \
+            patchelf
+
+      - name: Install JS deps
+        run: bun install --frozen-lockfile || bun install
+
+      - name: Build static frontend
+        run: bun --cwd apps/web run build
+
+      - name: Build & publish Tauri bundle
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: apps/tauri/src-tauri
+          tagName: ${{ github.ref_name || inputs.tag }}
+          releaseName: "Editor ${{ github.ref_name || inputs.tag }}"
+          releaseDraft: false
+          prerelease: false
+          args: ${{ matrix.args }}
