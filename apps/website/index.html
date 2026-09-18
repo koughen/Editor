@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0b0b">
+  <title>Editor — Make the cut.</title>
+  <meta name="description" content="Your footage. Your style. Your editor. A free, open-source desktop video editor with captions, color grading, audio mixing, and a workspace that moves with you.">
+  <link rel="canonical" href="__SITE_URL__">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Editor — Make the cut.">
+  <meta property="og:description" content="Cut, caption, color, and mix. A free desktop editor built around your creative process.">
+  <meta property="og:url" content="__SITE_URL__">
+  <meta property="og:image" content="__SITE_URL__media/edit-workspace.png">
+  <meta property="og:image:alt" content="Editor’s Edit workspace showing a coastal stock-footage project">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/png" href="./media/editor-icon.png">
+  <link rel="preload" href="./fonts/barlow-condensed-800.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="./fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./help.css">
+  <script type="module" src="./main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <svg class="svg-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="arrow-up-right" viewBox="0 0 24 24"><path d="M5 19 19 5M5 5h14v14"/></symbol>
+    <symbol id="arrow-down" viewBox="0 0 24 24"><path d="M12 3v17m-7-7 7 7 7-7"/></symbol>
+    <symbol id="download-icon" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></symbol>
+    <symbol id="scissors-icon" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="m8.2 8.2 12 12M8.2 15.8 20.2 3.8"/></symbol>
+    <symbol id="color-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v6m7.8 7.5-5.2-3m-10.4 3 5.2-3"/></symbol>
+    <symbol id="audio-icon" viewBox="0 0 24 24"><path d="M3 10v4m4-8v12m5-16v20m5-16v12m4-8v4"/></symbol>
+    <symbol id="check-icon" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="mac-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="13" rx="1"/><path d="M12 16v5m-5 0h10"/></symbol>
+    <symbol id="windows-icon" viewBox="0 0 24 24"><path d="M3 4h8v8H3zm10 0h8v8h-8zM3 14h8v8H3zm10 0h8v8h-8z"/></symbol>
+    <symbol id="linux-icon" viewBox="0 0 24 24"><path d="m5 7 5 5-5 5m8 0h6"/><rect x="2" y="2" width="20" height="20" rx="1"/></symbol>
+    <symbol id="github-icon" viewBox="0 0 24 24"><path d="M9 20c-4 1-4-2-6-2m12 4v-4c0-1 .2-1.8-.5-2.5 3.4-.4 7-1.7 7-7A5.4 5.4 0 0 0 20 4.8 5 5 0 0 0 19.9 1S18.5.6 15 2.5a14 14 0 0 0-6 0C5.5.6 4.1 1 4.1 1A5 5 0 0 0 4 4.8a5.4 5.4 0 0 0-1.5 3.7c0 5.3 3.6 6.6 7 7-.5.5-.5 1.3-.5 2.5v4"/></symbol>
+  </svg>
+
+  <header class="site-header">
+    <a class="brand" href="#" aria-label="Editor home"><img src="./media/editor-icon.png" alt="" width="38" height="38"><span>editor<span class="brand-period">.</span></span></a>
+    <nav class="desktop-nav" aria-label="Main navigation">
+      <a href="#workspaces">Workspaces</a><a href="#features">Features</a><a href="./help/">Help Center</a><a href="#faq">FAQ</a>
+    </nav>
+    <div class="header-actions"><a class="button button-small button-yellow" href="#download">Get Editor <svg class="icon" aria-hidden="true"><use href="#arrow-up-right"/></svg></a><button class="menu-toggle" aria-label="Open navigation" aria-expanded="false" aria-controls="mobile-nav"><span></span><span></span></button></div>
+    <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile navigation" hidden><a href="#workspaces">Workspaces</a><a href="#features">Features</a><a href="./help/">Help Center</a><a href="#faq">FAQ</a><a href="#download">Download Editor</a></nav>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <section class="hero" aria-labelledby="hero-title">
+      <a class="release-note" href="./releases/"><span class="release-square" aria-hidden="true"></span> MEET EDITOR 0.2.0 <span class="release-divider">/</span> MORE ROOM TO CREATE <svg class="icon" aria-hidden="true"><use href="#arrow-up-right"/></svg></a>
+      <h1 id="hero-title">MAKE THE <span class="cut-word">CUT<span class="cut-period">.</span><span class="playhead" aria-hidden="true"></span></span></h1>
+      <p class="hero-lede">Your footage. Your style. Your editor.</p>
+      <p class="hero-description">Cut, caption, color, and mix in one free desktop app.<br class="desktop-break"> A complete creative workspace, with room to make it yours.</p>
+      <div class="hero-actions"><a class="button button-yellow" href="#download">Download Editor <svg class="icon" aria-hidden="true"><use href="#download-icon"/></svg></a><a class="button button-outline" href="#workspaces">Take a closer look <svg class="icon" aria-hidden="true"><use href="#arrow-down"/></svg></a></div>
+      <div class="hero-proof"><span>Free & open source</span><span>No account needed</span><span>macOS · Windows · Linux</span></div>
+      <div class="hero-ruler" aria-hidden="true"><span>00:00:00:00</span><i></i><span>THIS IS WHERE IT STARTS</span><i></i><span>00:00:12:00</span></div>
+    </section>
+
+    <section class="workspace-section page-width" id="workspaces" aria-label="Explore Editor’s workspaces">
+      <div class="tour-bar"><span class="tour-label"><span class="status-dot" aria-hidden="true"></span> INSIDE EDITOR</span><div class="workspace-tabs" role="tablist" aria-label="Workspace preview">
+        <button id="tab-edit" class="workspace-tab" role="tab" aria-selected="true" aria-controls="workspace-panel" data-workspace="edit"><svg class="icon" aria-hidden="true"><use href="#scissors-icon"/></svg>Edit</button>
+        <button id="tab-color" class="workspace-tab" role="tab" aria-selected="false" aria-controls="workspace-panel" tabindex="-1" data-workspace="color"><svg class="icon" aria-hidden="true"><use href="#color-icon"/></svg>Color</button>
+        <button id="tab-audio" class="workspace-tab" role="tab" aria-selected="false" aria-controls="workspace-panel" tabindex="-1" data-workspace="audio"><svg class="icon" aria-hidden="true"><use href="#audio-icon"/></svg>Audio</button>
+        <button id="tab-export" class="workspace-tab" role="tab" aria-selected="false" aria-controls="workspace-panel" tabindex="-1" data-workspace="export"><svg class="icon" aria-hidden="true"><use href="#arrow-up-right"/></svg>Export</button>
+      </div></div>
+      <div class="workspace-panel" id="workspace-panel" role="tabpanel" aria-labelledby="tab-edit" tabindex="0">
+        <div class="workspace-image-wrap"><img id="workspace-image" src="./media/edit-1440.jpg" srcset="./media/edit-480.jpg 480w, ./media/edit-960.jpg 960w, ./media/edit-1440.jpg 1440w" sizes="(max-width: 520px) calc(100vw - 40px), (max-width: 800px) calc(100vw - 64px), (max-width: 1100px) calc(100vw - 80px), min(1248px, calc(100vw - 128px))" width="1470" height="922" alt="Editor’s Edit workspace with title styles, a coastal video preview, inspector, and multitrack timeline" loading="lazy"></div>
+        <div class="tour-caption"><div><p class="eyebrow" id="workspace-eyebrow">THE EDIT WORKSPACE</p><h2 id="workspace-heading">Find your flow.</h2></div><p id="workspace-copy">Build your story on a multitrack timeline. Add titles, refine captions, layer effects, and arrange every panel around the way you work.</p><a class="text-link" id="workspace-guide" href="./help/timeline/">Explore Edit <svg class="icon" aria-hidden="true"><use href="#arrow-up-right"/></svg></a></div>
+      </div>
+      <div class="workspace-index" aria-hidden="true"><span>PICTURE</span><span>COLOR</span><span>SOUND</span><span>DELIVERY</span><div class="index-playhead"></div></div>
+    </section>
+
+    <section class="features-section page-width" id="features" aria-labelledby="features-title">
+      <div class="section-heading"><div><p class="eyebrow">FROM FIRST CLIP TO FINAL FRAME</p><h2 id="features-title">BIG IDEAS.<br>ALL THE LITTLE DETAILS.</h2></div><p>The right tools, right where you need them.<br>Take your edit as far as your idea goes.</p></div>
+      <div class="feature-grid">
+        <article class="feature-card caption-card">
+          <div class="feature-copy"><span class="eyebrow">TITLES & CAPTIONS</span><h3>Give every word<br>its moment.</h3><p>Start with a style. Make it your own with fonts, outlines, shadows, and backgrounds. Fine-tune cue timing or export your subtitles.</p></div>
+          <div class="caption-demo" data-caption-style="punch"><img src="./media/coast-poster.jpg" alt="Waves breaking around a rocky coastal island" loading="lazy" width="960" height="506"><div class="caption-frame" aria-hidden="true"><span>EVERY</span><strong>MOMENT</strong><span>MATTERS.</span></div><span class="demo-label">STYLE PREVIEW</span></div>
+          <div class="style-controls" aria-label="Caption style preview"><span>MAKE IT YOURS</span><div><button data-caption="clean" aria-pressed="false">Clean</button><button data-caption="punch" aria-pressed="true">Punch</button><button data-caption="boxed" aria-pressed="false">Boxed</button></div></div>
+        </article>
+        <article class="feature-card layout-card">
+          <div class="feature-copy"><span class="eyebrow">YOUR WORKSPACE</span><h3>A desk that<br>fits your process.</h3><p>Move tabs, split panels, float tools, and save a layout for the task at hand. Your workspace picks up where you left it.</p></div>
+          <div class="layout-demo" data-layout="editing" aria-label="Editing layout preview"><div class="layout-tile tile-project"><span>PROJECT</span><div class="mini-media"><i></i><i></i><i></i><i></i></div></div><div class="layout-tile tile-viewer"><span>VIEWER</span><svg class="icon" aria-hidden="true"><use href="#scissors-icon"/></svg></div><div class="layout-tile tile-inspector"><span>INSPECTOR</span><i></i><i></i><i></i></div><div class="layout-tile tile-timeline"><span>TIMELINE</span><div class="mini-track"><i></i><i></i><i></i></div><div class="mini-track"><i></i><i></i></div><div class="mini-playhead"></div></div></div>
+          <div class="layout-controls"><span id="layout-name" aria-live="polite">EDITING LAYOUT</span><button id="cycle-layout" class="text-link">Switch it up <svg class="icon" aria-hidden="true"><use href="#arrow-up-right"/></svg></button></div>
+        </article>
+      </div>
+      <div class="detail-grid">
+        <article><svg class="feature-icon" aria-hidden="true"><use href="#color-icon"/></svg><h3>Set the mood.</h3><p>Shape your look with color wheels, curves, grading nodes, LUTs, and scopes. Save a still. Find your signature.</p><button class="text-link" data-explore="color">Explore color <svg class="icon" aria-hidden="true"><use href="#arrow-up-right"/></svg></button></article>
+        <article><svg class="feature-icon" aria-hidden="true"><use href="#audio-icon"/></svg><h3>Find the right balance.</h3><p>Mix tracks, clean up sound, build fades, and measure loudness. Deliver a finished mix or individual stems.</p><button class="text-link" data-explore="audio">Explore audio <svg class="icon" aria-hidden="true"><use href="#arrow-up-right"/></svg></button></article>
+        <article><svg class="feature-icon" aria-hidden="true"><use href="#scissors-icon"/></svg><h3>Make the moment land.</h3><p>Layer creative effects and adjustment clips. Add a dissolve, a wipe, or a dip, then dial in the timing.</p><a class="text-link" href="./help/effects/">Explore effects <svg class="icon" aria-hidden="true"><use href="#arrow-up-right"/></svg></a></article>
+      </div>
+    </section>
+
+    <section class="handoff-section page-width" aria-labelledby="handoff-title"><div class="handoff-copy"><p class="eyebrow">THE NEXT CHAPTER IS UP TO YOU</p><h2 id="handoff-title">FINISH HERE.<br>OR TAKE IT FURTHER.</h2><p>Export your finished video with control over resolution, frame rate, bitrate, and audio. Or send your timeline into the next part of your workflow.</p><button class="text-link" data-explore="export">See export options <svg class="icon" aria-hidden="true"><use href="#arrow-up-right"/></svg></button></div><div class="handoff-visual"><div class="handoff-origin"><img src="./media/editor-icon.png" width="52" height="52" alt=""><span>editor.</span></div><div class="handoff-lines" aria-hidden="true"></div><div class="handoff-destinations"><span>Premiere Pro <svg class="icon" aria-hidden="true"><use href="#arrow-up-right"/></svg></span><span>DaVinci Resolve <svg class="icon" aria-hidden="true"><use href="#arrow-up-right"/></svg></span><span>After Effects <svg class="icon" aria-hidden="true"><use href="#arrow-up-right"/></svg></span><span>CapCut <small>Experimental</small></span></div><p>Editable timeline handoffs or a rendered appearance transfer.<br><a href="./help/application-handoffs/">See supported formats and transfer notes.</a></p></div></section>
+
+    <section class="ownership-section" id="open-source" aria-labelledby="ownership-title"><div class="page-width ownership-inner"><div><p class="eyebrow">CREATIVE FREEDOM, BUILT IN</p><h2 id="ownership-title">YOUR IDEAS.<br>YOUR FILES.<br><span>YOUR CALL.</span></h2></div><div class="ownership-copy"><p class="ownership-lede">The tools are yours.<br>So is what you make.</p><div class="ownership-point"><svg class="icon" aria-hidden="true"><use href="#check-icon"/></svg><div><h3>Free from the first frame.</h3><p>Every workspace is included. No subscription, no paid feature tiers, no export watermark.</p></div></div><div class="ownership-point"><svg class="icon" aria-hidden="true"><use href="#check-icon"/></svg><div><h3>A home for your projects.</h3><p>Projects are stored on your device. Open the app and get to work, without creating an account.</p></div></div><div class="ownership-point"><svg class="icon" aria-hidden="true"><use href="#check-icon"/></svg><div><h3>Open to what comes next.</h3><p>Built on OpenCut. Open source under the MIT license. Explore the project and help shape the next release.</p></div></div><a class="button button-outline" href="./help/open-source/">Meet the project <svg class="icon" aria-hidden="true"><use href="#github-icon"/></svg></a></div></div></section>
+
+    <section class="download-section" id="download" aria-labelledby="download-title"><div class="page-width"><div class="download-heading"><div><p class="eyebrow">YOUR NEXT EDIT STARTS HERE</p><h2 id="download-title">LET’S MAKE<br>SOMETHING.</h2></div><div class="release-detail"><span class="version-stamp">V0.2.0</span><p>Free. Open source. Ready for your desktop.</p><a href="./releases/">Read the release notes <svg class="icon" aria-hidden="true"><use href="#arrow-up-right"/></svg></a></div></div>
+      <div class="download-grid">
+        <article class="download-card"><svg class="platform-icon" aria-hidden="true"><use href="#mac-icon"/></svg><h3>macOS</h3><p>Find your Mac’s chip in<br>Apple menu → About This Mac.</p><a class="button button-dark" href="https://github.com/koughen/Editor/releases/download/v0.2.0/Editor_0.2.0_aarch64.dmg">Apple Silicon <svg class="icon" aria-hidden="true"><use href="#download-icon"/></svg></a><a class="download-secondary" href="https://github.com/koughen/Editor/releases/download/v0.2.0/Editor_0.2.0_x64.dmg">Download for Intel Mac <span aria-hidden="true">↓</span></a></article>
+        <article class="download-card"><svg class="platform-icon" aria-hidden="true"><use href="#windows-icon"/></svg><h3>Windows</h3><p>For 64-bit Windows PCs.<br>Download, install, and start cutting.</p><a class="button button-dark" href="https://github.com/koughen/Editor/releases/download/v0.2.0/Editor_0.2.0_x64-setup.exe">Download for Windows <svg class="icon" aria-hidden="true"><use href="#download-icon"/></svg></a><a class="download-secondary" href="https://github.com/koughen/Editor/releases/download/v0.2.0/Editor_0.2.0_x64_en-US.msi">Get the MSI installer <span aria-hidden="true">↓</span></a></article>
+        <article class="download-card"><svg class="platform-icon" aria-hidden="true"><use href="#linux-icon"/></svg><h3>Linux</h3><p>Your desktop, your distribution.<br>Available for x86-64 systems.</p><a class="button button-dark" href="https://github.com/koughen/Editor/releases/download/v0.2.0/Editor_0.2.0_amd64.AppImage">Download AppImage <svg class="icon" aria-hidden="true"><use href="#download-icon"/></svg></a><div class="linux-links"><a href="https://github.com/koughen/Editor/releases/download/v0.2.0/Editor_0.2.0_amd64.deb">DEB <span aria-hidden="true">↓</span></a><a href="https://github.com/koughen/Editor/releases/download/v0.2.0/Editor-0.2.0-1.x86_64.rpm">RPM <span aria-hidden="true">↓</span></a></div></article>
+      </div><p class="download-footnote">Early software, actively developed. <a href="./help/installation/">Read the installation guide</a> for setup and signing information.</p>
+    </div></section>
+
+    <section class="home-help page-width"><div><p class="eyebrow">A LITTLE HELP GOES A LONG WAY</p><h2>YOUR NEXT STEP.<br>RIGHT HERE.</h2><p>Find practical guides for every workspace, detailed settings, troubleshooting, and answers to the questions that come up mid-edit.</p></div><a class="button button-yellow" href="./help/">Explore the Help Center <span aria-hidden="true">↗</span></a></section>
+
+    <section class="faq-section page-width" id="faq" aria-labelledby="faq-title"><div><p class="eyebrow">A FEW THINGS TO KNOW</p><h2 id="faq-title">GOOD<br>QUESTIONS.</h2><a class="text-link" href="./help/">Visit the Help Center <svg class="icon" aria-hidden="true"><use href="#arrow-up-right"/></svg></a></div><div class="faq-list">
+      <details name="faq"><summary>Is Editor really free?<span aria-hidden="true">+</span></summary><p>Yes. Editor is free and open source under the MIT license. All current workspaces are included, with no subscription, paid tier, or export watermark.</p></details>
+      <details name="faq"><summary>Do I need an account or an internet connection?<span aria-hidden="true">+</span></summary><p>No account is required. Projects and imported media are stored locally, and the core editing workflow runs on your computer. Downloads, online media sources, and the first download of a caption transcription model need an internet connection.</p></details>
+      <details name="faq"><summary>What can I do with captions?<span aria-hidden="true">+</span></summary><p>Generate captions with the local transcription engine, or import SRT, VTT, and ASS subtitles. Edit words and timings, split or merge cues, and style the text. Export plain SRT/VTT sidecars or render your styled captions into the video.</p></details>
+      <details name="faq"><summary>Can I move my project into another editor?<span aria-hidden="true">+</span></summary><p>You can create handoff packages for Premiere Pro, DaVinci Resolve, After Effects, and experimentally CapCut. Editable transfers preserve supported timeline properties; advanced effects and grades are not recreated as native controls. Choose Preserve appearance to render the finished look into the transfer. <a href="./help/application-handoffs/">Read the transfer guide.</a></p></details>
+      <details name="faq"><summary>Is there a mobile or browser version?<span aria-hidden="true">+</span></summary><p>This release is a desktop app for macOS, Windows, and Linux. The website is a tour of the product. It doesn’t run the editor or upload your footage.</p></details>
+      <details name="faq"><summary>How can I help make Editor better?<span aria-hidden="true">+</span></summary><p>Share a reproducible bug, suggest a workflow improvement, or contribute code. Editor is an independently maintained fork of OpenCut and is still evolving. <a href="./help/open-source/">Learn about the project.</a></p></details>
+    </div></section>
+  </main>
+
+  <footer class="site-footer page-width"><div class="footer-top"><a class="brand" href="#" aria-label="Back to Editor home"><img src="./media/editor-icon.png" alt="" width="38" height="38"><span>editor.</span></a><p>A little more freedom.<br>A lot more possibility.</p><nav aria-label="Footer navigation"><a href="#download">Download</a><a href="./help/">Help Center</a><a href="./help/open-source/">About the project</a><a href="./privacy/">Privacy</a><a href="./terms/">Terms</a><button class="footer-link" id="open-credits">Credits</button></nav></div><div class="footer-bottom"><span>© 2026 Editor contributors. Open source, always.</span><span>Built on <a href="./help/open-source/">OpenCut</a>. Made for your next idea.</span></div><div class="footer-wordmark" aria-hidden="true">MAKE IT YOURS.</div></footer>
+
+  <dialog id="credits-dialog" class="credits-dialog" aria-labelledby="credits-title"><div class="dialog-heading"><h2 id="credits-title">Credits & privacy</h2><button id="close-credits" class="dialog-close" aria-label="Close credits">×</button></div><p>This site uses no analytics, advertising trackers, sign-in, or tracking cookies. Read our <a href="./privacy/">Privacy</a> and <a href="./terms/">Terms</a> for hosting, local storage, and third-party service details.</p><h3>Stock footage</h3><p>Workspace previews are based on native app captures with the logo updated for the current brand. The Coastal Drift demo and caption preview use <a href="https://www.pexels.com/video/aerial-shot-of-an-ocean-9319200/">Aerial Shot of an Ocean by Engin Akyurt</a>, under the <a href="https://www.pexels.com/license/">Pexels License</a>. The footage is used to demonstrate Editor; the creator and Pexels do not endorse this project.</p><h3>Type & code</h3><p>Barlow Condensed and Manrope are self-hosted under the SIL Open Font License. Editor builds on OpenCut and is available under the <a href="./terms/#software-license">MIT license</a>. Product names mentioned in handoff features belong to their respective owners.</p></dialog>
+</body>
+</html>

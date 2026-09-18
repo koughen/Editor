@@ -15,7 +15,7 @@ Trim, layer, and export — fast.
 ![Rust](https://img.shields.io/badge/Rust-stable-orange?logo=rust&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-pink)
 
-[**Download**](https://github.com/koughen/Editor/releases) · [Build from source](#build-from-source) · [Tech](#stack)
+[**Website**](https://koughen.github.io/Editor/) · [**Download**](https://koughen.github.io/Editor/#download) · [Help Center](https://koughen.github.io/Editor/help/) · [Build from source](#build-from-source) · [Tech](#stack)
 
 </div>
 

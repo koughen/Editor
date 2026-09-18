@@ -9,6 +9,8 @@
     "build:tools": "turbo run build --filter=@opencut/tools",
     "build:wasm": "bash script/build-audio-worklet && wasm-pack build rust/wasm --target bundler --out-dir pkg && bun run script/sync-wasm.ts",
     "build:web": "turbo run build --filter=@opencut/web",
+    "build:website": "node apps/website/scripts/build.mjs",
+    "dev:website": "node apps/website/scripts/serve.mjs",
     "deploy:web": "turbo run deploy --filter=@opencut/web",
     "dev:tools": "turbo run dev --filter=@opencut/tools",
     "dev:wasm": "cargo watch -w rust/crates -w rust/wasm/src -s \"bun run build:wasm\"",
