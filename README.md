@@ -29,6 +29,8 @@ Trim, layer, and export — fast.
 
 ---
 
+Screenshots use a stock-media demo project. Coastal footage by [Engin Akyurt on Pexels](https://www.pexels.com/video/aerial-shot-of-an-ocean-9319200/); see [screenshot credits](docs/screenshots/README.md).
+
 ## Install
 
 ### One-liners
