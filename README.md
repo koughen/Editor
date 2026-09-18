@@ -22,7 +22,7 @@ Trim, layer, and export — fast.
 <br />
 
 <div align="center">
-  <img src="assets/screenshot-editor.png" alt="Editor — main view" width="100%" />
+  <img src="docs/screenshots/edit-workspace.png" alt="Editor — Edit workspace with titles and dockable panels" width="100%" />
 </div>
 
 <br />
@@ -123,6 +123,10 @@ Then:
 ```sh
 git clone https://github.com/koughen/Editor.git
 cd Editor
+cargo install wasm-pack --locked
+rustup target add wasm32-unknown-unknown
+bash script/build-audio-worklet
+wasm-pack build rust/wasm --target bundler --out-dir pkg
 bun install
 
 # Static frontend
@@ -190,7 +194,7 @@ Differences from upstream:
 - **Desktop-first.** Tauri shell, no web server in the loop.
 - **Local everything.** No accounts, no telemetry, no remote calls.
 - **Trimmed UI.** Direct boot into the projects screen.
-- **Pink.** Why not.
+- **Flexible workspaces.** Edit, Color, and Audio pages with a black-and-yellow theme.
 
 <br />
 
@@ -198,3 +202,25 @@ Differences from upstream:
 
 MIT — see [LICENSE](LICENSE).
 Original work © OpenCut, 2025. Modifications © koughen, 2026.
+
+## Edit workspace
+
+The **Edit** workspace brings titles, captions, effects, and transitions into dedicated panels. Drag tabs to regroup or split panels, resize tiles, float panels within the app, and save named layouts. Eight title styles include outline and shadow controls; the caption editor supports cue timing, split/merge, import, and SRT/VTT export. Search the effects library and apply visual entrance/exit transitions directly to selected clips. Each tool has one home, without duplicate sidebar entries. See [Edit workspace](docs/edit-workspace.md) for controls and behavior.
+
+## Color correction
+
+The **Color** workspace includes serial grading nodes, primary and log wheels, RGB bars, custom and secondary curves, RGB mixing, qualifiers, windows, 3D LUTs, numeric keyframes, Gallery stills, reference wipe, preview bypass/matte highlight, and five viewer scopes. See [Color workspace](docs/color-workspace.md) for controls, the Resolve comparison and remaining differences, build steps, and validation.
+
+![Color workspace with grading wheels, nodes, and scopes](docs/screenshots/color-workspace.png)
+
+## Audio mixing
+
+The **Audio** workspace adds track and bus mixing, EQ, compression, reverb, delay, cleanup tools, routing, automation, fades, LUFS/true-peak measurement, and WAV/stem delivery. The macOS app also hosts installed effect Audio Units through rendered previews and exports. See [Audio workspace](docs/audio-workspace.md) for controls, supported workflows, and validation.
+
+![Audio workspace with mixer and channel processing](docs/screenshots/audio-workspace.png)
+
+## Export and app handoffs
+
+The **Export** workspace adds detailed video and audio encoding controls plus timeline handoffs to CapCut, After Effects, Premiere Pro, and DaVinci Resolve. Choose editable clips or a rendered appearance transfer. See [Export workspace](docs/export-workspace.md) for format support, import steps, fidelity limits, and validation.
+
+![Export workspace with video settings and application handoffs](docs/screenshots/export-workspace.png)

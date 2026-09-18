@@ -309,6 +309,8 @@ export function buildSubtitleTextElement({
 	return {
 		...DEFAULTS.text.element,
 		name: `Caption ${index + 1}`,
+		isCaption: true,
+		stroke: { color: "#000000", width: 2 },
 		content,
 		duration: mediaTimeFromSeconds({ seconds: caption.duration }),
 		startTime: mediaTimeFromSeconds({ seconds: caption.startTime }),

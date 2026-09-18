@@ -20,6 +20,10 @@ import type {
 import { PreviewContextMenu } from "./context-menu";
 import { PreviewToolbar } from "./toolbar";
 import {
+	useColorMonitorStore,
+	colorMonitorTracks,
+} from "@/color/monitor-store";
+import {
 	PreviewViewportProvider,
 	usePreviewViewportState,
 } from "./preview-viewport";
@@ -89,6 +93,7 @@ export function PreviewPanel({
 
 function RenderTreeController() {
 	const editor = useEditor();
+	const colorMonitor = useColorMonitorStore();
 	const tracks = useEditor(
 		(e) => e.timeline.getPreviewTracks() ?? e.scenes.getActiveScene().tracks,
 	);
@@ -102,7 +107,7 @@ function RenderTreeController() {
 
 		const duration = editor.timeline.getTotalDuration();
 		const renderTree = buildScene({
-			tracks,
+			tracks: colorMonitorTracks({ tracks, monitor: colorMonitor }),
 			mediaAssets,
 			duration,
 			canvasSize: { width, height },
@@ -111,7 +116,14 @@ function RenderTreeController() {
 		});
 
 		editor.renderer.setRenderTree({ renderTree });
-	}, [tracks, mediaAssets, activeProject?.settings.background, width, height]);
+	}, [
+		tracks,
+		colorMonitor,
+		mediaAssets,
+		activeProject?.settings.background,
+		width,
+		height,
+	]);
 
 	return null;
 }
@@ -188,21 +200,16 @@ function PreviewCanvas({
 		);
 		const frame = Math.floor(renderTime / ticksPerFrame);
 
-		if (
-			frame === lastFrameRef.current &&
-			renderTree === lastSceneRef.current
-		) {
+		if (frame === lastFrameRef.current && renderTree === lastSceneRef.current) {
 			return;
 		}
 
 		renderingRef.current = true;
 		lastSceneRef.current = renderTree;
 		lastFrameRef.current = frame;
-		renderer
-			.render({ node: renderTree, time: renderTime })
-			.then(() => {
-				renderingRef.current = false;
-			});
+		renderer.render({ node: renderTree, time: renderTime }).then(() => {
+			renderingRef.current = false;
+		});
 	}, [renderer, renderTree, editor.playback, editor.timeline]);
 
 	useRafLoop(render);
@@ -302,20 +309,20 @@ function PreviewCanvas({
 								ref={viewportRef}
 								className="relative flex size-full min-h-0 min-w-0 items-center justify-center overflow-hidden"
 							>
-							<div
-								ref={canvasMountRef}
-								className="absolute block border"
-								style={{
-									left: viewport.sceneLeft,
-									top: viewport.sceneTop,
-									width: viewport.sceneWidth,
-									height: viewport.sceneHeight,
-									background:
-										activeProject.settings.background.type === "blur"
-											? "transparent"
-											: activeProject?.settings.background.color,
-								}}
-							/>
+								<div
+									ref={canvasMountRef}
+									className="absolute block border"
+									style={{
+										left: viewport.sceneLeft,
+										top: viewport.sceneTop,
+										width: viewport.sceneWidth,
+										height: viewport.sceneHeight,
+										background:
+											activeProject.settings.background.type === "blur"
+												? "transparent"
+												: activeProject?.settings.background.color,
+									}}
+								/>
 								<PreviewOverlayLayer
 									instances={overlayInstances}
 									plane="under-interaction"

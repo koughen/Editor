@@ -1,3 +1,4 @@
+import { transitionTails } from "opencut-wasm";
 import type { SceneTracks, TimelineTrack } from "@/timeline";
 import type { MediaAsset } from "@/media/types";
 import { RootNode } from "./nodes/root-node";
@@ -41,7 +42,24 @@ function buildTrackNodes({
 	for (const track of tracks) {
 		const elements = getVisibleSortedElements({ track });
 
-		for (const element of elements) {
+		const tails = transitionTails({
+			clips: elements.map((element) => {
+				const transition =
+					"effects" in element
+						? element.effects?.find(
+								(effect) => effect.type === "clip-transition" && effect.enabled,
+							)
+						: undefined;
+				return {
+					start: element.startTime,
+					duration: element.duration,
+					visual: element.type === "video" || element.type === "image",
+					inMode: Number(transition?.params.inMode ?? 0),
+					inDuration: Number(transition?.params.inDuration ?? 0),
+				};
+			}),
+		});
+		for (const [index, element] of elements.entries()) {
 			if (element.type === "effect") {
 				nodes.push(
 					new EffectLayerNode({
@@ -66,7 +84,9 @@ function buildTrackNodes({
 							mediaId: mediaAsset.id,
 							url: mediaAsset.url,
 							file: mediaAsset.file,
-							duration: element.duration,
+							sourceDuration: mediaAsset.duration,
+							duration: element.duration + tails[index],
+							contentDuration: element.duration,
 							timeOffset: element.startTime,
 							trimStart: element.trimStart,
 							trimEnd: element.trimEnd,
@@ -84,7 +104,8 @@ function buildTrackNodes({
 					nodes.push(
 						new ImageNode({
 							url: mediaAsset.url,
-							duration: element.duration,
+							duration: element.duration + tails[index],
+							contentDuration: element.duration,
 							timeOffset: element.startTime,
 							trimStart: element.trimStart,
 							trimEnd: element.trimEnd,

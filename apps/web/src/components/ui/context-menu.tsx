@@ -35,14 +35,14 @@ const ContextMenuSub = ContextMenuPrimitive.Sub;
 const ContextMenuRadioGroup = ContextMenuPrimitive.RadioGroup;
 
 const contextMenuItemVariants = cva(
-	"relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-3 py-1.5 text-sm text-foreground/85 outline-hidden data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:size-3.5 [&_svg]:shrink-0",
+	"relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-3 py-1.5 text-sm text-foreground/85 outline-hidden data-[highlighted]:outline data-[highlighted]:outline-primary data-[highlighted]:-outline-offset-1 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:size-3.5 [&_svg]:shrink-0",
 	{
 		variants: {
 			variant: {
 				default:
 					"focus:bg-accent focus:text-accent-foreground [&_svg]:text-muted-foreground",
 				destructive:
-					"text-destructive focus:bg-destructive/10 focus:text-destructive [&_svg]:text-destructive",
+					"text-destructive focus:bg-accent focus:text-destructive [&_svg]:text-destructive",
 			},
 		},
 		defaultVariants: {

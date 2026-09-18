@@ -36,13 +36,13 @@ const DropdownMenuSub = DropdownMenuPrimitive.Sub;
 const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
 
 const dropdownMenuItemVariants = cva(
-	"relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2.5 py-1.5 text-sm text-foreground/85 outline-hidden data-[highlighted]:bg-popover-hover data-disabled:pointer-events-none data-disabled:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0",
+	"relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2.5 py-1.5 text-sm text-foreground/85 outline-hidden data-[highlighted]:bg-popover-hover data-[highlighted]:outline data-[highlighted]:outline-primary data-[highlighted]:-outline-offset-1 data-disabled:pointer-events-none data-disabled:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0",
 	{
 		variants: {
 			variant: {
 				default: "",
 				destructive:
-					"text-destructive data-[highlighted]:bg-destructive/5 data-[highlighted]:text-destructive",
+					"text-destructive data-[highlighted]:bg-popover-hover data-[highlighted]:text-destructive",
 			},
 		},
 		defaultVariants: {

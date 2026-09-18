@@ -1,3 +1,4 @@
+import type { AudioMixSettings, AudioBus, FadeCurve } from "@/audio/types";
 import type { ElementAnimations } from "@/animation/types";
 import type { Effect } from "@/effects/types";
 import type { Mask } from "@/masks/types";
@@ -35,6 +36,8 @@ interface BaseTrack {
 }
 
 export interface VideoTrack extends BaseTrack {
+	audioMix?: Partial<AudioMixSettings>;
+	solo?: boolean;
 	type: "video";
 	elements: (VideoElement | ImageElement)[];
 	muted: boolean;
@@ -48,6 +51,8 @@ export interface TextTrack extends BaseTrack {
 }
 
 export interface AudioTrack extends BaseTrack {
+	audioMix?: Partial<AudioMixSettings>;
+	solo?: boolean;
 	type: "audio";
 	elements: AudioElement[];
 	muted: boolean;
@@ -75,6 +80,8 @@ export type TimelineTrack =
 export type OverlayTrack = VideoTrack | TextTrack | GraphicTrack | EffectTrack;
 
 export interface SceneTracks {
+	audioBuses?: AudioBus[];
+	audioMaster?: Partial<AudioMixSettings>;
 	overlay: OverlayTrack[];
 	main: VideoTrack;
 	audio: AudioTrack[];
@@ -86,6 +93,10 @@ export interface RetimeConfig {
 }
 
 interface BaseAudioElement extends BaseTimelineElement {
+	fadeInCurve?: FadeCurve;
+	fadeOutCurve?: FadeCurve;
+	fadeIn?: number;
+	fadeOut?: number;
 	type: "audio";
 	volume: number;
 	muted?: boolean;
@@ -117,6 +128,10 @@ interface BaseTimelineElement {
 }
 
 export interface VideoElement extends BaseTimelineElement {
+	fadeInCurve?: FadeCurve;
+	fadeOutCurve?: FadeCurve;
+	fadeIn?: number;
+	fadeOut?: number;
 	type: "video";
 	mediaId: string;
 	volume?: number;
@@ -154,6 +169,9 @@ export interface TextBackground {
 
 export interface TextElement extends BaseTimelineElement {
 	type: "text";
+	isCaption?: boolean;
+	stroke?: { color: string; width: number };
+	shadow?: { color: string; blur: number; offsetX: number; offsetY: number };
 	content: string;
 	fontSize: number;
 	fontFamily: string;

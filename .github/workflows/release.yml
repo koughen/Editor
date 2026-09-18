@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to release (e.g. v0.1.2)"
+        description: "Tag to release (e.g. v0.2.0)"
         required: true
 
 jobs:
@@ -40,14 +40,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
 
       - name: Install Bun
         uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.18
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.target }}
+          targets: ${{ matrix.target && format('wasm32-unknown-unknown,{0}', matrix.target) || 'wasm32-unknown-unknown' }}
 
       - name: Cache cargo
         uses: swatinem/rust-cache@v2
@@ -66,6 +70,13 @@ jobs:
             libsoup-3.0-dev \
             patchelf
 
+      - name: Build local renderer and audio worklet
+        shell: bash
+        run: |
+          cargo install wasm-pack --locked
+          bash script/build-audio-worklet
+          wasm-pack build rust/wasm --target bundler --out-dir pkg
+
       - name: Install JS deps
         run: bun install
 
@@ -79,15 +90,35 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           projectPath: apps/tauri/src-tauri
-          tagName: ${{ github.ref_name || inputs.tag }}
-          releaseName: "Editor ${{ github.ref_name || inputs.tag }}"
-          releaseDraft: false
+          tagName: ${{ inputs.tag || github.ref_name }}
+          releaseName: "Editor ${{ inputs.tag || github.ref_name }}"
+          releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
 
+  publish-release:
+    name: Publish release with notes and screenshots
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+      - name: Publish completed release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          gh release upload "$TAG" docs/screenshots/*.png --clobber
+          gh release edit "$TAG" --title "Editor $TAG" \
+            --notes-file "docs/releases/$TAG.md" --draft=false --latest
+
   publish-managers:
     name: Publish to Homebrew + Scoop
-    needs: build
+    needs: publish-release
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -102,7 +133,7 @@ jobs:
         id: meta
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REF: ${{ github.ref_name || inputs.tag }}
+          REF: ${{ inputs.tag || github.ref_name }}
         run: |
           set -euo pipefail
           TAG="$REF"

@@ -18,6 +18,22 @@ export interface ExportOptions {
 	quality: ExportQuality;
 	fps?: FrameRate;
 	includeAudio?: boolean;
+	width?: number;
+	height?: number;
+	codec?: "avc" | "hevc" | "vp9" | "av1";
+	videoBitrate?: number;
+	bitrateMode?: "constant" | "variable";
+	keyFrameInterval?: number;
+	hardwareAcceleration?:
+		| "no-preference"
+		| "prefer-hardware"
+		| "prefer-software";
+	audioBitrate?: number;
+	audioSampleRate?: number;
+	audioChannels?: number;
+	rangeStart?: number;
+	rangeEnd?: number;
+	fit?: "contain" | "cover" | "stretch";
 }
 
 export interface ExportResult {
@@ -66,5 +82,5 @@ export function downloadBuffer({
 	document.body.appendChild(downloadLink);
 	downloadLink.click();
 	document.body.removeChild(downloadLink);
-	URL.revokeObjectURL(url);
+	setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }

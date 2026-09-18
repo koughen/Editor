@@ -1,9 +1,11 @@
 "use client";
 
+import { TransitionIndicators } from "@/transitions/components/clip-indicators";
 import { createContext, useContext } from "react";
 import { useEditor } from "@/editor/use-editor";
 import { useAssetsPanelStore } from "@/components/editor/panels/assets/assets-panel-store";
 import { AudioWaveform, WAVEFORM_GAIN_SAMPLE_COUNT } from "./audio-waveform";
+import { AudioFadeHandles } from "@/audio/components/clip-fades";
 import { AudioVolumeLine } from "./audio-volume-line";
 import { useElementPreview } from "@/timeline/hooks/use-element-preview";
 import {
@@ -403,6 +405,7 @@ export function TimelineElement({
 							onResizeStart={onResizeStart}
 							isDropTarget={isDropTarget}
 						/>
+						<TransitionIndicators element={renderElement} trackId={track.id} height={baseTrackHeight} />
 						{isSelected && (
 							<div
 								className="pointer-events-none absolute inset-x-0 top-0 overflow-hidden"
@@ -1041,6 +1044,7 @@ function AudioElementContent({
 						color={TIMELINE_TRACK_THEME.audio.waveformColor}
 					/>
 					<AudioVolumeLine element={element} trackId={trackId} />
+				<AudioFadeHandles element={element} trackId={trackId} />
 				</div>
 			</div>
 		);
@@ -1054,6 +1058,7 @@ function AudioElementContent({
 				</span>
 			</div>
 			<AudioVolumeLine element={element} trackId={trackId} />
+				<AudioFadeHandles element={element} trackId={trackId} />
 		</div>
 	);
 }

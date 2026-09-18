@@ -76,13 +76,13 @@ function GridItem({
 			aria-pressed={isSelected}
 			className={cn(
 				"flex cursor-pointer rounded-sm flex-col gap-2 px-1.5 py-1.5 hover:bg-foreground/5",
-				isSelected && "bg-primary/5! text-primary",
+				isSelected && "bg-accent! text-primary",
 			)}
 		>
 			<div
 				className={cn(
 					"aspect-video bg-foreground/5 flex items-center justify-center rounded-sm",
-					isSelected && "bg-primary/5!",
+					isSelected && "bg-accent!",
 				)}
 			>
 				{preview}

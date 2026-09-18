@@ -40,7 +40,7 @@ export class PlaybackManager {
 	}
 
 	play(): void {
-		const maxTime = this.editor.timeline.getTotalDuration();
+		const maxTime = this.playbackDuration();
 		if (maxTime <= 0) {
 			return;
 		}
@@ -152,7 +152,7 @@ export class PlaybackManager {
 	}
 
 	private reconcileTimelineScope(): void {
-		const maxTime = this.editor.timeline.getTotalDuration();
+		const maxTime = this.playbackDuration();
 		const nextTime = this.clampTimeToTimeline(this.currentTime);
 		const shouldPause = this.isPlaying && nextTime >= maxTime;
 		const timeChanged = nextTime !== this.currentTime;
@@ -221,15 +221,15 @@ export class PlaybackManager {
 			b: mediaTimeFromSeconds({ seconds: elapsedSeconds }),
 		});
 		const newTime = fps ? roundFrameTime({ time: rawTime, fps }) : rawTime;
-		const maxTime = this.editor.timeline.getTotalDuration();
+		const maxTime = this.playbackDuration();
 
 		if (newTime >= maxTime) {
 			this.pause();
 			this.currentTime = maxTime;
 			this.notify();
-		this.notifySeek(maxTime);
-		this.dispatchSeekEvent(maxTime);
-		return;
+			this.notifySeek(maxTime);
+			this.dispatchSeekEvent(maxTime);
+			return;
 		}
 
 		this.currentTime = newTime;
@@ -238,8 +238,17 @@ export class PlaybackManager {
 		this.playbackTimer = requestAnimationFrame(this.updateTime);
 	};
 
+	private playbackDuration(): MediaTime {
+		return addMediaTime({
+			a: this.editor.timeline.getTotalDuration(),
+			b: mediaTimeFromSeconds({
+				seconds: this.editor.audio?.getPlaybackTailSeconds() ?? 0,
+			}),
+		});
+	}
+
 	private clampTimeToTimeline(time: MediaTime): MediaTime {
-		const maxTime = this.editor.timeline.getTotalDuration();
+		const maxTime = this.playbackDuration();
 		return clampMediaTime({ time, min: ZERO_MEDIA_TIME, max: maxTime });
 	}
 

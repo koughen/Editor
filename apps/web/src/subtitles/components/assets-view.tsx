@@ -1,3 +1,4 @@
+import { CaptionEditor } from "./caption-editor";
 import { Button } from "@/components/ui/button";
 import { PanelView } from "@/components/editor/panels/assets/views/base-panel";
 import {
@@ -82,6 +83,36 @@ function processingReducer(
 }
 
 export function Captions() {
+	const [tab, setTab] = useState("edit");
+	return (
+		<div className="caption-workspace">
+			<div className="edit-segmented caption-tabs">
+				<button
+					type="button"
+					aria-pressed={tab === "edit"}
+					onClick={() => setTab("edit")}
+				>
+					Edit cues
+				</button>
+				<button
+					type="button"
+					aria-pressed={tab === "generate"}
+					onClick={() => setTab("generate")}
+				>
+					Generate / import
+				</button>
+			</div>
+			<div className="caption-view" hidden={tab !== "edit"}>
+				<CaptionEditor />
+			</div>
+			<div className="caption-view" hidden={tab !== "generate"}>
+				<GenerateCaptions />
+			</div>
+		</div>
+	);
+}
+function GenerateCaptions() {
+	const [wordsPerChunk, setWordsPerChunk] = useState(3);
 	const [selectedLanguage, setSelectedLanguage] =
 		useState<TranscriptionLanguage>("auto");
 	const [processing, dispatch] = useReducer(processingReducer, IDLE_STATE);
@@ -137,7 +168,10 @@ export function Captions() {
 			});
 
 			dispatch({ type: "update_step", step: "Generating captions..." });
-			const captionChunks = buildCaptionChunks({ segments: result.segments });
+			const captionChunks = buildCaptionChunks({
+				segments: result.segments,
+				wordsPerChunk,
+			});
 
 			if (!insertCaptions({ captions: captionChunks })) {
 				dispatch({ type: "fail", error: "No captions were generated" });
@@ -276,7 +310,7 @@ export function Captions() {
 			<input
 				ref={fileInputRef}
 				type="file"
-				accept=".srt,.ass"
+				accept=".srt,.ass,.vtt"
 				className="hidden"
 				onChange={(event) => void handleFileChange({ event })}
 			/>
@@ -287,6 +321,24 @@ export function Captions() {
 			>
 				<SectionContent className="flex flex-col gap-4 h-full pt-1">
 					<SectionFields>
+						<SectionField label="Words per caption">
+							<input
+								className="caption-words"
+								aria-label="Words per caption"
+								type="number"
+								min="1"
+								max="20"
+								value={wordsPerChunk}
+								onChange={(e) =>
+									setWordsPerChunk(
+										Math.max(
+											1,
+											Math.min(20, Math.round(Number(e.target.value) || 3)),
+										),
+									)
+								}
+							/>
+						</SectionField>
 						<SectionField label="Language">
 							<Select
 								value={selectedLanguage}

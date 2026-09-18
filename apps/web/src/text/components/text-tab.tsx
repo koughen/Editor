@@ -1,5 +1,6 @@
 "use client";
 
+import { AppearanceSection } from "./appearance-section";
 import { Textarea } from "@/components/ui/textarea";
 import { FontPicker } from "@/components/ui/font-picker";
 import type { TextElement } from "@/timeline";
@@ -30,10 +31,7 @@ import { useKeyframedNumberProperty } from "@/components/editor/panels/propertie
 import { useElementPlayhead } from "@/components/editor/panels/properties/hooks/use-element-playhead";
 import { KeyframeToggle } from "@/components/editor/panels/properties/components/keyframe-toggle";
 import { isPropertyAtDefault } from "@/rendering/components/transform-tab";
-import {
-	resolveColorAtTime,
-	resolveNumberAtTime,
-} from "@/animation/values";
+import { resolveColorAtTime, resolveNumberAtTime } from "@/animation/values";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
 	MinusSignIcon,
@@ -57,6 +55,7 @@ export function TextTab({
 			<TypographySection element={element} trackId={trackId} />
 			<SpacingSection element={element} trackId={trackId} />
 			<BackgroundSection element={element} trackId={trackId} />
+			<AppearanceSection element={element} trackId={trackId} />
 		</div>
 	);
 }

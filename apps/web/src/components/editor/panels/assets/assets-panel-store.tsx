@@ -1,3 +1,4 @@
+import { AudioLines, Palette } from "lucide-react";
 import type { ElementType } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -19,6 +20,8 @@ export const TAB_KEYS = [
 	"sounds",
 	"text",
 	"stickers",
+	"color",
+	"audio",
 	"effects",
 	"transitions",
 	"captions",
@@ -35,6 +38,8 @@ const createHugeiconsIcon =
 	);
 
 export const tabs = {
+	audio: { icon: AudioLines, label: "Audio" },
+	color: { icon: Palette, label: "Color" },
 	media: {
 		icon: createHugeiconsIcon({ icon: Folder03Icon }),
 		label: "Media",

@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Audio checks</title>
+  <script type="importmap">{"imports":{"opencut-wasm":"./wasm/opencut_wasm.js"}}</script>
+  <style>body{background:#181c24;color:#e4e9f1;font:16px system-ui;padding:40px}pre{line-height:2;white-space:pre-wrap}</style>
+</head>
+<body>
+  <h1>Running audio checks…</h1>
+  <pre>Initializing the audio engine…</pre>
+  <script type="module">
+    import init from './wasm/opencut_wasm.js';
+    try { await init(); await import('./check.js'); }
+    catch (error) { document.querySelector('pre').textContent = error.stack; document.title = 'Audio checks FAILED'; }
+  </script>
+</body>
+</html>

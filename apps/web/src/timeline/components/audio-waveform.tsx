@@ -17,7 +17,7 @@ import { cn } from "@/utils/ui";
 const BAR_WIDTH = 1;
 const BAR_GAP = 1;
 const BAR_STEP = BAR_WIDTH + BAR_GAP;
-const WAVEFORM_BURN_COLOR = "rgba(255, 110, 20, 0.9)";
+const WAVEFORM_BURN_COLOR = "rgba(255, 214, 0, 0.9)";
 export const WAVEFORM_GAIN_SAMPLE_COUNT = 200;
 
 function sampleGainAtClipTime({

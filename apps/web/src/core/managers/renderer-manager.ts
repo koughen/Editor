@@ -6,7 +6,8 @@ import { SceneExporter } from "@/services/renderer/scene-exporter";
 import { buildScene } from "@/services/renderer/scene-builder";
 import { createTimelineAudioBuffer } from "@/media/audio";
 import { formatTimecode } from "opencut-wasm";
-import { frameRateToFloat } from "@/fps/utils";
+import { resolveSettings } from "@/export/settings";
+import { TICKS_PER_SECOND } from "@/wasm";
 import { downloadBlob } from "@/utils/browser";
 
 type SnapshotResult =
@@ -122,7 +123,10 @@ export class RendererManager {
 				return { success: false, error: "Failed to create image" };
 			}
 
-			const timecode = formatTimecode({ time: renderTime, rate: fps })!.replace(/:/g, "-");
+			const timecode = formatTimecode({ time: renderTime, rate: fps })!.replace(
+				/:/g,
+				"-",
+			);
 			const safeName =
 				activeProject.metadata.name.replace(/[<>:"/\\|?*]/g, "-").trim() ||
 				"snapshot";
@@ -147,8 +151,6 @@ export class RendererManager {
 		onProgress?: ({ progress }: { progress: number }) => void;
 		onCancel?: () => boolean;
 	}): Promise<ExportResult> {
-		const { format, quality, fps, includeAudio } = options;
-
 		try {
 			const tracks = this.editor.scenes.getActiveScene().tracks;
 			const mediaAssets = this.editor.media.getAssets();
@@ -163,7 +165,14 @@ export class RendererManager {
 				return { success: false, error: "Project is empty" };
 			}
 
-			const exportFps = fps ?? activeProject.settings.fps;
+			const settings = resolveSettings({
+				options,
+				projectSettings: activeProject.settings,
+				duration,
+			});
+			const includeAudio = settings.includeAudio;
+			this.editor.playback.pause();
+			if (onCancel?.()) return { success: false, cancelled: true };
 			const canvasSize = activeProject.settings.canvasSize;
 
 			let audioBuffer: AudioBuffer | null = null;
@@ -173,6 +182,7 @@ export class RendererManager {
 					tracks,
 					mediaAssets,
 					duration,
+					sampleRate: settings.audioSampleRate,
 				});
 			}
 
@@ -184,14 +194,52 @@ export class RendererManager {
 				background: activeProject.settings.background,
 			});
 
+			if (onCancel?.()) return { success: false, cancelled: true };
+			if (audioBuffer) {
+				const start = Math.round(
+					(settings.startTicks / TICKS_PER_SECOND) * settings.audioSampleRate,
+				);
+				const length = Math.max(
+					1,
+					Math.ceil(
+						((settings.endTicks - settings.startTicks) / TICKS_PER_SECOND) *
+							settings.audioSampleRate,
+					),
+				);
+				const clipped = new AudioBuffer({
+					length,
+					numberOfChannels: settings.audioChannels,
+					sampleRate: settings.audioSampleRate,
+				});
+				for (let channel = 0; channel < settings.audioChannels; channel++) {
+					const output = clipped.getChannelData(channel);
+					if (settings.audioChannels === 1) {
+						for (
+							let source = 0;
+							source < audioBuffer.numberOfChannels;
+							source++
+						) {
+							const data = audioBuffer.getChannelData(source);
+							for (let i = 0; i < length; i++)
+								output[i] +=
+									(data[start + i] ?? 0) / audioBuffer.numberOfChannels;
+						}
+					} else
+						output.set(
+							audioBuffer
+								.getChannelData(
+									Math.min(channel, audioBuffer.numberOfChannels - 1),
+								)
+								.subarray(start, start + length),
+						);
+				}
+				audioBuffer = clipped;
+			}
 			const exporter = new SceneExporter({
-				width: canvasSize.width,
-				height: canvasSize.height,
-				fps: exportFps,
-				format,
-				quality,
-				shouldIncludeAudio: !!includeAudio,
-				audioBuffer: audioBuffer || undefined,
+				sourceWidth: canvasSize.width,
+				sourceHeight: canvasSize.height,
+				settings,
+				audioBuffer: audioBuffer ?? undefined,
 			});
 
 			exporter.on("progress", (progress) => {
@@ -215,7 +263,7 @@ export class RendererManager {
 				const buffer = await exporter.export({ rootNode: scene });
 				clearInterval(cancelInterval);
 
-				if (cancelled) {
+				if (cancelled || onCancel?.()) {
 					return { success: false, cancelled: true };
 				}
 

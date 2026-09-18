@@ -26,7 +26,10 @@ import { TransformTab } from "@/rendering/components/transform-tab";
 import { BlendingTab } from "@/rendering/components/blending-tab";
 import { AudioTab } from "@/timeline/components/audio-tab";
 import { TextTab } from "@/text/components/text-tab";
-import { ClipEffectsTab, StandaloneEffectTab } from "@/effects/components/effects-tab";
+import {
+	ClipEffectsTab,
+	StandaloneEffectTab,
+} from "@/effects/components/effects-tab";
 import { MasksTab } from "@/masks/components/masks-tab";
 import { SpeedTab } from "@/speed/components/speed-tab";
 import { GraphicTab } from "@/graphics/components/graphic-tab";
@@ -150,7 +153,9 @@ function buildGraphicTab({
 		id: "graphic",
 		label: "Graphic",
 		icon: <OcShapesIcon size={16} />,
-		content: ({ trackId }) => <GraphicTab element={element} trackId={trackId} />,
+		content: ({ trackId }) => (
+			<GraphicTab element={element} trackId={trackId} />
+		),
 	};
 }
 
@@ -180,6 +185,7 @@ function getTextConfig({
 			buildTextTab({ element }),
 			buildTransformTab({ element }),
 			buildBlendingTab({ element }),
+			buildClipEffectsTab({ element }),
 		],
 	};
 }

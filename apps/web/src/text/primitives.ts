@@ -1,3 +1,4 @@
+import type { TextElement } from "@/timeline";
 import type { TextCanvasContext, TextBlockMeasurement } from "@/text/layout";
 import { DEFAULTS } from "@/timeline/defaults";
 import { clamp } from "@/utils/math";
@@ -53,7 +54,11 @@ export interface ResolvedTextBackgroundLike {
 	cornerRadius: number;
 }
 
-export function quoteFontFamily({ fontFamily }: { fontFamily: string }): string {
+export function quoteFontFamily({
+	fontFamily,
+}: {
+	fontFamily: string;
+}): string {
 	return `"${fontFamily.replace(/"/g, '\\"')}"`;
 }
 
@@ -145,6 +150,9 @@ export function drawMeasuredTextLayout({
 	background,
 	backgroundColor,
 	textBaseline = "middle",
+	stroke,
+	shadow,
+	appearanceScale = 1,
 }: {
 	ctx: TextCanvasContext;
 	layout: MeasuredTextLayout;
@@ -152,6 +160,9 @@ export function drawMeasuredTextLayout({
 	background?: ResolvedTextBackgroundLike | null;
 	backgroundColor?: string;
 	textBaseline?: CanvasTextBaseline;
+	stroke?: TextElement["stroke"];
+	shadow?: TextElement["shadow"];
+	appearanceScale?: number;
 }): void {
 	ctx.font = layout.fontString;
 	ctx.textAlign = layout.textAlign;
@@ -199,7 +210,22 @@ export function drawMeasuredTextLayout({
 
 	for (let index = 0; index < layout.lines.length; index++) {
 		const lineY = index * layout.lineHeightPx - layout.block.visualCenterOffset;
+		ctx.save();
+		if (shadow) {
+			ctx.shadowColor = shadow.color;
+			ctx.shadowBlur = shadow.blur * appearanceScale;
+			ctx.shadowOffsetX = shadow.offsetX * appearanceScale;
+			ctx.shadowOffsetY = shadow.offsetY * appearanceScale;
+		}
+		if (stroke && stroke.width > 0) {
+			ctx.strokeStyle = stroke.color;
+			ctx.lineWidth = stroke.width * 2 * appearanceScale;
+			ctx.lineJoin = "round";
+			ctx.strokeText(layout.lines[index], 0, lineY);
+			ctx.shadowColor = "transparent";
+		}
 		ctx.fillText(layout.lines[index], 0, lineY);
+		ctx.restore();
 		drawTextDecoration({
 			ctx,
 			textDecoration: layout.textDecoration,

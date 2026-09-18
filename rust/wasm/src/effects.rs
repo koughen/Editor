@@ -99,3 +99,64 @@ fn parse_apply_effect_passes_options(value: JsValue) -> Result<ApplyEffectPasses
         passes: read_serde_property(&object, "passes")?,
     })
 }
+
+#[derive(Deserialize)]
+struct ColorScopeOptions {
+    rgba: Vec<u8>,
+    width: usize,
+    #[serde(default)]
+    parade: bool,
+    #[serde(default)]
+    mode: Option<String>,
+}
+
+#[wasm_bindgen(js_name = buildColorScope)]
+pub fn build_color_scope(options: JsValue) -> Result<Vec<u8>, JsValue> {
+    let options: ColorScopeOptions = serde_wasm_bindgen::from_value(options)
+        .map_err(|error| JsValue::from_str(&error.to_string()))?;
+    Ok(effects::color_scope_mode(
+        &options.rgba,
+        options.width,
+        options
+            .mode
+            .as_deref()
+            .unwrap_or(if options.parade { "parade" } else { "waveform" }),
+    ))
+}
+
+#[derive(Deserialize)]
+struct ParseCubeOptions {
+    text: String,
+}
+
+#[derive(Deserialize)]
+struct ColorSampleOptions {
+    rgb: [u8; 3],
+}
+#[wasm_bindgen(js_name = sampleColor)]
+pub fn sample_color(options: JsValue) -> Result<Vec<f32>, JsValue> {
+    let options: ColorSampleOptions =
+        serde_wasm_bindgen::from_value(options).map_err(|e| JsValue::from_str(&e.to_string()))?;
+    Ok(effects::sample_color(options.rgb).to_vec())
+}
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct CubeResult {
+    size: u32,
+    domain_min: [f32; 3],
+    domain_max: [f32; 3],
+    values: Vec<f32>,
+}
+#[wasm_bindgen(js_name = parseCubeLut)]
+pub fn parse_cube_lut(options: JsValue) -> Result<JsValue, JsValue> {
+    let options: ParseCubeOptions =
+        serde_wasm_bindgen::from_value(options).map_err(|e| JsValue::from_str(&e.to_string()))?;
+    let lut = effects::parse_cube(&options.text).map_err(|e| JsValue::from_str(&e))?;
+    serde_wasm_bindgen::to_value(&CubeResult {
+        size: lut.size,
+        domain_min: lut.domain_min,
+        domain_max: lut.domain_max,
+        values: lut.values,
+    })
+    .map_err(|e| JsValue::from_str(&e.to_string()))
+}

@@ -1,0 +1,5 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Export checks</title>
+<script type="importmap">{"imports":{"opencut-wasm":"./wasm/opencut_wasm.js"}}</script>
+<style>body{background:#16171a;color:#eee;font:15px system-ui;padding:32px}pre{white-space:pre-wrap;line-height:1.8}</style></head>
+<body><h1>Running export checks…</h1><pre>Rendering and decoding real media…</pre>
+<script type="module">import init from './wasm/opencut_wasm.js';try{await init();await import('./check.js')}catch(e){document.querySelector('pre').textContent=e.stack;document.title='Export checks FAILED'}</script></body></html>

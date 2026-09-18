@@ -1,5 +1,7 @@
 "use client";
 
+import { AudioLines, Palette, Scissors } from "lucide-react";
+import { useAssetsPanelStore } from "@/components/editor/panels/assets/assets-panel-store";
 import { Button } from "../ui/button";
 import { useRef, useState } from "react";
 import {
@@ -12,7 +14,6 @@ import { RenameProjectDialog } from "@/project/components/rename-project-dialog"
 import { DeleteProjectDialog } from "@/project/components/delete-project-dialog";
 import { useRouter } from "next/navigation";
 import { ExportButton } from "./export-button";
-import { ThemeToggle } from "../theme-toggle";
 import { DEFAULT_LOGO_URL } from "@/site/brand";
 import { toast } from "sonner";
 import { useEditor } from "@/editor/use-editor";
@@ -23,15 +24,57 @@ import Image from "next/image";
 import { cn } from "@/utils/ui";
 
 export function EditorHeader() {
+	const { activeTab, setActiveTab } = useAssetsPanelStore();
 	return (
-		<header className="bg-background flex h-[3.4rem] items-center justify-between px-3 pt-0.5">
+		<header className="bg-background flex h-[3.4rem] shrink-0 items-center justify-between border-b px-3 mb-2">
 			<div className="flex items-center gap-1">
 				<ProjectDropdown />
 				<EditableProjectName />
 			</div>
+
+			<div
+				role="tablist"
+				aria-label="Editor workspace"
+				className="flex items-center gap-1"
+			>
+				<Button
+					role="tab"
+					aria-selected={activeTab !== "color" && activeTab !== "audio"}
+					variant={
+						activeTab !== "color" && activeTab !== "audio" ? "default" : "ghost"
+					}
+					size="sm"
+					className="h-9 min-w-24 border border-border uppercase tracking-wider text-[11px] aria-selected:border-primary"
+					onClick={() => setActiveTab("media")}
+				>
+					<Scissors size={14} />
+					Edit
+				</Button>
+				<Button
+					role="tab"
+					aria-selected={activeTab === "color"}
+					variant={activeTab === "color" ? "default" : "ghost"}
+					size="sm"
+					className="h-9 min-w-24 border border-border uppercase tracking-wider text-[11px] aria-selected:border-primary"
+					onClick={() => setActiveTab("color")}
+				>
+					<Palette size={14} />
+					Color
+				</Button>
+				<Button
+					role="tab"
+					aria-selected={activeTab === "audio"}
+					variant={activeTab === "audio" ? "default" : "ghost"}
+					size="sm"
+					className="h-9 min-w-24 border border-border uppercase tracking-wider text-[11px] aria-selected:border-primary"
+					onClick={() => setActiveTab("audio")}
+				>
+					<AudioLines size={14} />
+					Audio
+				</Button>
+			</div>
 			<nav className="flex items-center gap-2">
 				<ExportButton />
-				<ThemeToggle />
 			</nav>
 		</header>
 	);
@@ -105,13 +148,18 @@ function ProjectDropdown() {
 		<>
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
-					<Button variant="ghost" size="icon" className="p-1 rounded-sm size-8">
+					<Button
+						variant="ghost"
+						size="icon"
+						className="size-9 p-0"
+						aria-label="Project menu"
+					>
 						<Image
 							src={DEFAULT_LOGO_URL}
-							alt="Project thumbnail"
-							width={32}
-							height={32}
-							className="invert dark:invert-0 size-5"
+							alt="Editor"
+							width={64}
+							height={64}
+							className="size-8 object-contain"
 						/>
 					</Button>
 				</DropdownMenuTrigger>

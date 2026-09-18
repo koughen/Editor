@@ -144,7 +144,9 @@ function ProjectsHeader() {
 								size="icon"
 								className={cn(
 									"rounded-sm hover:bg-background",
-									isHydrated && viewMode === mode && "!bg-accent",
+									isHydrated &&
+										viewMode === mode &&
+										"!bg-primary !text-primary-foreground",
 								)}
 								onClick={() => setViewMode({ viewMode: mode })}
 								aria-label={label}
@@ -552,7 +554,7 @@ function ProjectItem({
 	};
 
 	const gridContent = (
-		<Card className="bg-background overflow-hidden border-none p-0">
+		<Card className="bg-card overflow-hidden border border-border p-0 group-hover:border-muted-foreground">
 			<div className="bg-muted relative aspect-video">
 				<div className="absolute inset-0">
 					{project.thumbnail ? (
@@ -576,7 +578,7 @@ function ProjectItem({
 				)}
 			</div>
 
-			<CardContent className="flex flex-col gap-2 px-0 pt-4">
+			<CardContent className="flex flex-col gap-2 border-t p-3">
 				<h3 className="group-hover:text-foreground/90 line-clamp-2 text-sm leading-snug font-medium">
 					{project.name}
 				</h3>
@@ -622,7 +624,7 @@ function ProjectItem({
 	const listContent = (
 		<div
 			className={`flex items-center gap-4 py-2 px-4 border-b border-border/50 ${
-				isSelected ? "bg-primary/5" : ""
+				isSelected ? "bg-accent outline outline-primary -outline-offset-1" : ""
 			}`}
 		>
 			<Checkbox
@@ -908,7 +910,7 @@ function ProjectsSkeleton() {
 							<Skeleton className="bg-muted/50 size-full" />
 						</div>
 					</div>
-					<CardContent className="flex flex-col gap-2 px-0 pt-4">
+					<CardContent className="flex flex-col gap-2 border-t p-3">
 						<Skeleton className="bg-muted/50 h-4 w-3/4" />
 						<div className="text-muted-foreground flex items-center gap-1.5">
 							<Skeleton className="bg-muted/50 size-4" />

@@ -95,21 +95,28 @@ async function resolveNode({
 	);
 }
 
-function resolveEffectPassGroups({
+export function resolveEffectPassGroups({
 	effects,
 	animations,
 	localTime,
+	duration,
 	width,
 	height,
 }: {
 	effects: Effect[] | undefined;
 	animations: VisualNodeParams["animations"];
 	localTime: number;
+	duration: number;
 	width: number;
 	height: number;
 }): EffectPass[][] {
 	return (effects ?? [])
 		.filter((effect) => effect.enabled)
+		.sort(
+			(a, b) =>
+				Number(a.type === "clip-transition") -
+				Number(b.type === "clip-transition"),
+		)
 		.map((effect) => {
 			const resolvedParams = resolveEffectParamsAtTime({
 				effectId: effect.id,
@@ -120,7 +127,10 @@ function resolveEffectPassGroups({
 			const definition = effectsRegistry.get(effect.type);
 			return resolveEffectPasses({
 				definition,
-				effectParams: resolvedParams,
+				effectParams:
+					effect.type === "clip-transition"
+						? { ...resolvedParams, localTime, clipDuration: duration }
+						: resolvedParams,
 				width,
 				height,
 			});
@@ -146,7 +156,7 @@ function resolveVisualState({
 	const localTime = getElementLocalTime({
 		timelineTime: context.time,
 		elementStartTime: params.timeOffset,
-		elementDuration: params.duration,
+		elementDuration: params.contentDuration ?? params.duration,
 	});
 	const transform = resolveTransformAtTime({
 		baseTransform: params.transform,
@@ -175,6 +185,7 @@ function resolveVisualState({
 		opacity,
 		effectPasses: resolveEffectPassGroups({
 			effects: params.effects,
+			duration: params.contentDuration ?? params.duration,
 			animations: params.animations,
 			localTime,
 			width: effectWidth,
@@ -204,7 +215,12 @@ async function resolveVideoNode({
 	const frame = await videoCache.getFrameAt({
 		mediaId: node.params.mediaId,
 		file: node.params.file,
-		time: mediaTimeToSeconds({ time: roundMediaTime({ time: sourceTimeTicks }) }),
+		time: Math.min(
+			mediaTimeToSeconds({ time: roundMediaTime({ time: sourceTimeTicks }) }),
+			node.params.sourceDuration != null
+				? Math.max(0, node.params.sourceDuration - 0.001)
+				: Infinity,
+		),
 	});
 	if (!frame) {
 		return null;
@@ -356,6 +372,7 @@ function resolveTextNode({
 		}),
 		effectPasses: resolveEffectPassGroups({
 			effects: node.params.effects,
+			duration: node.params.duration,
 			animations: node.params.animations,
 			localTime,
 			width: context.renderer.width,
@@ -421,7 +438,9 @@ async function resolveBackdropSource({
 		const frame = await videoCache.getFrameAt({
 			mediaId: node.params.mediaId,
 			file: node.params.file,
-			time: mediaTimeToSeconds({ time: roundMediaTime({ time: sourceTimeTicks }) }),
+			time: mediaTimeToSeconds({
+				time: roundMediaTime({ time: sourceTimeTicks }),
+			}),
 		});
 		if (!frame) {
 			return null;

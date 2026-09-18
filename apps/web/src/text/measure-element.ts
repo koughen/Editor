@@ -2,13 +2,8 @@ import { CORNER_RADIUS_MIN } from "@/text/background";
 import { DEFAULTS } from "@/timeline/defaults";
 import type { TextBackground, TextElement } from "@/timeline";
 import { resolveNumberAtTime } from "@/animation/values";
-import {
-	getTextVisualRect,
-} from "./layout";
-import {
-	measureTextLayout,
-	type MeasuredTextLayout,
-} from "./primitives";
+import { getTextVisualRect } from "./layout";
+import { measureTextLayout, type MeasuredTextLayout } from "./primitives";
 
 export interface ResolvedTextBackground extends TextBackground {
 	paddingX: number;
@@ -125,6 +120,20 @@ export function measureTextElement({
 		fontSizeRatio: measuredLayout.fontSizeRatio,
 	});
 
+	const scale = canvasHeight / 1080;
+	const outline = (element.stroke?.width ?? 0) * scale;
+	const shadow = element.shadow;
+	const padding =
+		outline +
+		(shadow
+			? (shadow.blur * 2 +
+					Math.max(Math.abs(shadow.offsetX), Math.abs(shadow.offsetY))) *
+				scale
+			: 0);
+	visualRect.left -= padding;
+	visualRect.top -= padding;
+	visualRect.width += padding * 2;
+	visualRect.height += padding * 2;
 	return {
 		...measuredLayout,
 		resolvedBackground,

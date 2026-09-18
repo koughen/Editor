@@ -9,13 +9,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/ui";
 import {
-	TAB_KEYS,
+	type Tab,
 	tabs,
 	useAssetsPanelStore,
 } from "@/components/editor/panels/assets/assets-panel-store";
 
-export function TabBar() {
-	const { activeTab, setActiveTab } = useAssetsPanelStore();
+const PROJECT_TABS = ["media", "sounds", "stickers", "settings"] as const;
+
+export function TabBar({ activeTab }: { activeTab: Tab }) {
+	const { setActiveTab } = useAssetsPanelStore();
 	const [showTopFade, setShowTopFade] = useState(false);
 	const [showBottomFade, setShowBottomFade] = useState(false);
 	const scrollRef = useRef<HTMLDivElement>(null);
@@ -51,7 +53,7 @@ export function TabBar() {
 				ref={scrollRef}
 				className="scrollbar-hidden relative flex size-full p-1 flex-col items-center justify-start gap-0.5 overflow-y-auto"
 			>
-				{TAB_KEYS.map((tabKey) => {
+				{PROJECT_TABS.map((tabKey) => {
 					const tab = tabs[tabKey];
 					return (
 						<Tooltip key={tabKey} delayDuration={10}>
@@ -60,6 +62,7 @@ export function TabBar() {
 									variant={activeTab === tabKey ? "secondary" : "ghost"}
 									size="icon"
 									aria-label={tab.label}
+									aria-pressed={activeTab === tabKey}
 									className={cn(
 										"shrink-0",
 										"h-8 w-8",

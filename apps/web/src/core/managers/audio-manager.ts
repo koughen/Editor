@@ -1,3 +1,14 @@
+import { createTimelineAudioBuffer } from "@/media/audio";
+import { getAudioTracks } from "@/audio/settings";
+import { toast } from "sonner";
+import {
+	initializeAudioProcessing,
+	createProcessor,
+	readLoudnessMessage,
+	SILENT_LOUDNESS,
+} from "@/audio/worklet";
+import type { LoudnessReading } from "@/audio/types";
+import { AudioMixerGraph, type ChannelMeter } from "@/audio/graph";
 import type { EditorCore } from "@/core";
 import { TICKS_PER_SECOND } from "@/wasm";
 import { clampRetimeRate, shouldMaintainPitch } from "@/retime/rate";
@@ -22,7 +33,105 @@ import {
 } from "mediabunny";
 
 export class AudioManager {
+	private loudness: LoudnessReading = { ...SILENT_LOUDNESS };
+	private loudnessNode: AudioWorkletNode | null = null;
+	private meterTap: GainNode | null = null;
+	private monitorGain: GainNode | null = null;
+	readLoudness(): LoudnessReading {
+		return this.loudness;
+	}
+	resetLoudness(): void {
+		if (!this.audioContext || !this.meterTap || !this.monitorGain) return;
+		this.loudnessNode?.port.postMessage({ dispose: true });
+		this.loudnessNode?.disconnect();
+		this.loudnessNode?.port.close();
+		this.meterTap.disconnect();
+		this.loudness = { ...SILENT_LOUDNESS };
+		this.loudnessNode = createProcessor({
+			context: this.audioContext,
+			meter: true,
+		});
+		if (this.loudnessNode) {
+			this.meterTap.connect(this.loudnessNode).connect(this.monitorGain);
+			this.loudnessNode.port.postMessage({
+				active: this.editor.playback.getIsPlaying(),
+			});
+			this.loudnessNode.port.onmessage = ({ data }) => {
+				this.loudness = readLoudnessMessage({ data });
+			};
+		} else this.meterTap.connect(this.monitorGain);
+	}
 	private audioContext: AudioContext | null = null;
+	private mixer: AudioMixerGraph | null = null;
+	private timelineSignature = "";
+	private pluginPreview: {
+		signature: string;
+		buffer: AudioBuffer;
+		tailSeconds: number;
+		tracks: import("@/timeline").SceneTracks;
+		assets: import("@/media/types").MediaAsset[];
+	} | null = null;
+	private nativePlaying = false;
+	private useReferencePreview = false;
+	setLivePreview(): void {
+		this.useReferencePreview = false;
+		this.editor.playback.pause();
+	}
+	getPlaybackTailSeconds(): number {
+		return this.useReferencePreview &&
+			this.pluginPreview &&
+			this.editor.scenes.getActiveSceneOrNull() &&
+			this.pluginPreview.tracks ===
+				this.editor.scenes.getActiveSceneOrNull()?.tracks &&
+			this.pluginPreview.assets === this.editor.media.getAssets()
+			? this.pluginPreview.tailSeconds
+			: 0;
+	}
+	getPreviewMode(): string {
+		return this.nativePlaying
+			? "Rendered preview"
+			: this.useReferencePreview && this.pluginPreview
+				? "Rendered preview ready"
+				: "Live mixer";
+	}
+	private mixSignature(): string {
+		const scene = this.editor.scenes.getActiveScene();
+		return JSON.stringify([
+			scene.id,
+			scene.tracks,
+			this.editor.media.getAssets().map((m) => [m.id, m.url]),
+		]);
+	}
+	async preparePluginPreview({
+		tailSeconds = 3,
+	}: {
+		tailSeconds?: number;
+	} = {}): Promise<void> {
+		this.editor.playback.pause();
+		const scene = this.editor.scenes.getActiveScene();
+		const signature = this.mixSignature();
+		const buffer = await createTimelineAudioBuffer({
+			tracks: scene.tracks,
+			mediaAssets: this.editor.media.getAssets(),
+			duration: this.editor.timeline.getTotalDuration(),
+			tailSeconds,
+			audioContext: this.ensureAudioContext() ?? undefined,
+		});
+		if (!buffer) throw new Error("Add audio to the timeline first.");
+		if (signature !== this.mixSignature())
+			throw new Error(
+				"The mix changed during rendering. Render the preview again.",
+			);
+		this.pluginPreview = {
+			signature,
+			buffer,
+			tailSeconds,
+			tracks: scene.tracks,
+			assets: this.editor.media.getAssets(),
+		};
+		this.useReferencePreview = true;
+	}
+
 	private masterGain: GainNode | null = null;
 	private playbackStartTime = 0;
 	private playbackStartContextTime = 0;
@@ -108,7 +217,46 @@ export class AudioManager {
 		this.stopPlayback();
 	};
 
+	readMeter({ trackId }: { trackId: string }): ChannelMeter {
+		return this.editor.playback.getIsPlaying() && this.mixer
+			? this.mixer.readMeter({ trackId })
+			: { left: 0, right: 0, reduction: 0 };
+	}
+
 	private handleTimelineChange = (): void => {
+		const scene = this.editor.scenes.getActiveSceneOrNull();
+		if (this.nativePlaying) {
+			this.editor.playback.pause();
+			toast.info(
+				"Mix changed. Render the plug-in preview again to hear the updated mix.",
+			);
+		}
+		if (
+			scene &&
+			this.editor.playback.getIsPlaying() &&
+			[
+				...getAudioTracks({ tracks: scene.tracks }).map((t) => t.audioMix),
+				scene.tracks.audioMaster,
+			].some((s) => !s?.bypass && s?.plugins?.some((p) => !p.bypass))
+		) {
+			this.editor.playback.pause();
+			toast.info("Render the plug-in preview to hear the updated mix.");
+		}
+		if (scene && this.mixer) this.mixer.update({ tracks: scene.tracks });
+		// Channel edits update live nodes without interrupting or decoding clips.
+		const signature = JSON.stringify([
+			scene?.id,
+			scene
+				? [
+						...scene.tracks.overlay,
+						scene.tracks.main,
+						...scene.tracks.audio,
+					].map((t) => [t.id, t.elements])
+				: [],
+			this.editor.media.getAssets().map((m) => [m.id, m.url]),
+		]);
+		if (signature === this.timelineSignature) return;
+		this.timelineSignature = signature;
 		this.disposeSinks();
 		this.preparedClipBuffers.clear();
 		this.decodedBuffers.clear();
@@ -125,18 +273,24 @@ export class AudioManager {
 		if (typeof window === "undefined") return null;
 
 		this.audioContext = createAudioContext();
+		this.meterTap = this.audioContext.createGain();
+		this.monitorGain = this.audioContext.createGain();
+		this.monitorGain.gain.value = this.lastVolume;
+		this.meterTap
+			.connect(this.monitorGain)
+			.connect(this.audioContext.destination);
 		const { input } = createAudioMasteringChain({
 			audioContext: this.audioContext,
-			destination: this.audioContext.destination,
+			destination: this.meterTap,
 		});
 		this.masterGain = input;
-		this.masterGain.gain.value = this.lastVolume;
+		this.masterGain.gain.value = 1;
 		return this.audioContext;
 	}
 
 	private updateGain(): void {
-		if (!this.masterGain) return;
-		this.masterGain.gain.value = this.lastVolume;
+		if (!this.monitorGain) return;
+		this.monitorGain.gain.value = this.lastVolume;
 	}
 
 	private getPlaybackTime(): number {
@@ -147,11 +301,26 @@ export class AudioManager {
 	}
 
 	private async startPlayback({ time }: { time: number }): Promise<void> {
+		try {
+			await this.startPlaybackInternal({ time });
+		} catch (e) {
+			this.editor.playback.pause();
+			toast.error(
+				e instanceof Error ? e.message : "Audio playback could not start.",
+			);
+		}
+	}
+
+	private async startPlaybackInternal({
+		time,
+	}: {
+		time: number;
+	}): Promise<void> {
 		const audioContext = this.ensureAudioContext();
 		if (!audioContext) return;
 
 		this.stopPlayback();
-		this.playbackSessionId++;
+		const sessionId = this.playbackSessionId;
 		this.playbackLatencyCompensationSeconds = 0;
 
 		const tracks = this.editor.scenes.getActiveScene().tracks;
@@ -164,8 +333,61 @@ export class AudioManager {
 			await audioContext.resume();
 		}
 
-		this.clips = await collectAudioClips({ tracks, mediaAssets });
-		if (!this.editor.playback.getIsPlaying()) return;
+		await initializeAudioProcessing({ context: audioContext });
+		const clips = await collectAudioClips({ tracks, mediaAssets });
+		if (
+			!this.editor.playback.getIsPlaying() ||
+			sessionId !== this.playbackSessionId
+		)
+			return;
+		time = this.editor.playback.getCurrentTime() / TICKS_PER_SECOND;
+		this.resetLoudness();
+		const hasPlugins = [
+			...getAudioTracks({ tracks }).map((t) => t.audioMix),
+			tracks.audioMaster,
+		].some((s) => !s?.bypass && s?.plugins?.some((p) => !p.bypass));
+		if (
+			hasPlugins ||
+			(this.useReferencePreview &&
+				this.pluginPreview?.signature === this.mixSignature())
+		) {
+			if (
+				!this.pluginPreview ||
+				this.pluginPreview.signature !== this.mixSignature()
+			) {
+				this.editor.playback.pause();
+				toast.info(
+					"Render the plug-in preview in Audio → Effects → Audio Unit inserts, then press Play.",
+				);
+				return;
+			}
+			const source = audioContext.createBufferSource();
+			source.buffer = this.pluginPreview.buffer;
+			source.connect(this.meterTap ?? audioContext.destination);
+			source.start(0, Math.min(time, source.buffer.duration));
+			this.queuedSources.add(source);
+			this.nativePlaying = true;
+			return;
+		}
+		this.clips = clips;
+		this.mixer = new AudioMixerGraph({
+			context: audioContext,
+			destination: this.masterGain ?? audioContext.destination,
+		});
+		this.mixer.setTransport({
+			timelineStart: time,
+			contextStart: audioContext.currentTime,
+			duration: duration / TICKS_PER_SECOND,
+		});
+		this.mixer.update({ tracks: this.editor.scenes.getActiveScene().tracks });
+		this.timelineSignature = JSON.stringify([
+			this.editor.scenes.getActiveScene().id,
+			[...tracks.overlay, tracks.main, ...tracks.audio].map((t) => [
+				t.id,
+				t.elements,
+			]),
+			mediaAssets.map((m) => [m.id, m.url]),
+		]);
 
 		this.playbackStartTime = time;
 		this.playbackStartContextTime = audioContext.currentTime;
@@ -211,6 +433,11 @@ export class AudioManager {
 	}
 
 	private stopPlayback(): void {
+		this.nativePlaying = false;
+		this.loudnessNode?.port.postMessage({ active: false });
+		this.playbackSessionId++;
+		this.mixer?.dispose();
+		this.mixer = null;
 		if (this.scheduleTimer && typeof window !== "undefined") {
 			window.clearInterval(this.scheduleTimer);
 		}
@@ -289,7 +516,11 @@ export class AudioManager {
 			const clipGain = audioContext.createGain();
 			clipGain.gain.value = clip.volume;
 			node.connect(clipGain);
-			clipGain.connect(this.masterGain ?? audioContext.destination);
+			clipGain.connect(
+				this.mixer?.inputFor({ elementId: clip.id }) ??
+					this.masterGain ??
+					audioContext.destination,
+			);
 
 			const startTimestamp =
 				this.playbackStartContextTime +
@@ -330,6 +561,15 @@ export class AudioManager {
 				}
 			}
 
+			node.stop(
+				Math.max(
+					audioContext.currentTime,
+					this.playbackStartContextTime +
+						this.playbackLatencyCompensationSeconds +
+						clipEnd -
+						this.playbackStartTime,
+				),
+			);
 			this.queuedSources.add(node);
 			node.addEventListener("ended", () => {
 				node.disconnect();
@@ -381,7 +621,11 @@ export class AudioManager {
 		node.buffer = buffer;
 		const clipGain = audioContext.createGain();
 		node.connect(clipGain);
-		clipGain.connect(this.masterGain ?? audioContext.destination);
+		clipGain.connect(
+			this.mixer?.inputFor({ elementId: clip.id }) ??
+				this.masterGain ??
+				audioContext.destination,
+		);
 
 		const startTimestamp =
 			this.playbackStartContextTime +

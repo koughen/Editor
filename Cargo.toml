@@ -1,6 +1,10 @@
 [workspace]
 resolver = "2"
 members = [
+    "rust/crates/editing",
+    "rust/audio-worklet",
+    "rust/crates/export",
+    "rust/crates/audio",
     "apps/desktop",
     "rust/crates/time",
     "rust/crates/bridge",

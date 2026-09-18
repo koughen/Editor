@@ -52,6 +52,9 @@ export function renderTextToContext({
 		background: resolved.measuredText.resolvedBackground,
 		backgroundColor: resolved.backgroundColor,
 		textBaseline: baseline,
+		stroke: node.params.stroke,
+		shadow: node.params.shadow,
+		appearanceScale: node.params.canvasHeight / 1080,
 	});
 
 	ctx.restore();

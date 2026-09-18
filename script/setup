@@ -32,6 +32,7 @@ need () {
 
 need bun "install: curl -fsSL https://bun.sh/install | bash"
 need cargo "install: https://rustup.rs"
+need wasm-pack "install: cargo install wasm-pack --locked"
 need git "install via your system package manager"
 
 OS="$(uname -s)"
@@ -60,6 +61,10 @@ case "$OS" in
 esac
 
 echo
+bold "Building local renderer"
+bash script/build-audio-worklet
+wasm-pack build rust/wasm --target bundler --out-dir pkg
+
 bold "Installing JS deps"
 bun install
 

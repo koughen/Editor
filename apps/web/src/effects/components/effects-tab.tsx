@@ -25,7 +25,8 @@ import {
 } from "@hugeicons/core-free-icons";
 import { cn } from "@/utils/ui";
 import { Separator } from "@/components/ui/separator";
-import { useAssetsPanelStore } from "@/components/editor/panels/assets/assets-panel-store";
+import { useWorkspaceStore } from "@/workspace/store";
+import { activatePanel } from "@/workspace/layout";
 
 export function StandaloneEffectTab({
 	element,
@@ -179,6 +180,28 @@ export function ClipEffectsTab({
 									renderParams={getRenderParams({ effectId: effect.id })}
 									previewParam={buildPreviewParam(effect.id)}
 									onCommit={commit}
+									onMoveUp={
+										index > 0
+											? () =>
+													editor.timeline.reorderClipEffects({
+														trackId,
+														elementId: element.id,
+														fromIndex: index,
+														toIndex: index - 1,
+													})
+											: undefined
+									}
+									onMoveDown={
+										index < effects.length - 1
+											? () =>
+													editor.timeline.reorderClipEffects({
+														trackId,
+														elementId: element.id,
+														fromIndex: index,
+														toIndex: index + 1,
+													})
+											: undefined
+									}
 									onToggle={() =>
 										editor.timeline.toggleClipEffect({
 											trackId,
@@ -204,7 +227,10 @@ export function ClipEffectsTab({
 }
 
 function EmptyView() {
-	const setActiveTab = useAssetsPanelStore((s) => s.setActiveTab);
+	const openEffects = () => {
+		const state = useWorkspaceStore.getState();
+		state.setLayout(activatePanel({ layout: state.layout, panel: "effects" }));
+	};
 
 	return (
 		<div className="flex flex-col h-full items-center justify-center gap-4 text-center">
@@ -216,14 +242,10 @@ function EmptyView() {
 			<div className="flex flex-col gap-2">
 				<h3 className="font-medium text-foreground">No effects</h3>
 				<p className="text-muted-foreground text-sm text-balance max-w-44">
-					Add effects to this layer from the Assets panel.
+					Add effects to this clip from the Effects panel.
 				</p>
 			</div>
-			<Button
-				variant="default"
-				size="sm"
-				onClick={() => setActiveTab("effects")}
-			>
+			<Button variant="default" size="sm" onClick={openEffects}>
 				Open effects
 			</Button>
 		</div>
@@ -237,6 +259,8 @@ function EffectSection({
 	onCommit,
 	onToggle,
 	onRemove,
+	onMoveUp,
+	onMoveDown,
 }: {
 	effect: Effect;
 	renderParams: ParamValues;
@@ -244,6 +268,8 @@ function EffectSection({
 	onCommit: () => void;
 	onToggle?: () => void;
 	onRemove?: () => void;
+	onMoveUp?: () => void;
+	onMoveDown?: () => void;
 }) {
 	const definition = effectsRegistry.get(effect.type);
 
@@ -257,6 +283,24 @@ function EffectSection({
 				trailing={
 					onToggle && (
 						<div className="flex items-center gap-1">
+							<Button
+								variant="ghost"
+								size="icon"
+								aria-label={`Move ${definition.name} earlier`}
+								disabled={!onMoveUp}
+								onClick={onMoveUp}
+							>
+								↑
+							</Button>
+							<Button
+								variant="ghost"
+								size="icon"
+								aria-label={`Move ${definition.name} later`}
+								disabled={!onMoveDown}
+								onClick={onMoveDown}
+							>
+								↓
+							</Button>
 							<Button
 								variant={effect.enabled ? "secondary" : "ghost"}
 								size="icon"

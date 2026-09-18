@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+audio_test_dir=$(mktemp -d /tmp/editor-audio-test.XXXXXX)
+wasm-pack build rust/wasm --target web --out-dir "$audio_test_dir/wasm" --no-opt
+if command -v bun >/dev/null 2>&1; then
+  bun build apps/web/tests/audio-browser.ts --target browser --external opencut-wasm --outfile "$audio_test_dir/check.js"
+else
+  npm exec --yes --package bun@1.2.18 -- bun build apps/web/tests/audio-browser.ts --target browser --external opencut-wasm --outfile "$audio_test_dir/check.js"
+fi
+bash script/build-audio-worklet
+cp -R apps/web/public/audio "$audio_test_dir/audio"
+cp apps/web/tests/audio-browser.html "$audio_test_dir/index.html"
+echo "Open http://127.0.0.1:3012 to run the real Web Audio checks. No sound is played."
+python3 -m http.server 3012 --bind 127.0.0.1 --directory "$audio_test_dir"

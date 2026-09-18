@@ -1,3 +1,4 @@
+import { parseVttSubtitles } from "opencut-wasm";
 import { parseAss } from "./ass";
 import { parseSrt } from "./srt";
 import type { ParseSubtitleResult } from "./types";
@@ -13,6 +14,12 @@ export function parseSubtitleFile({
 	const extension = getFileExtension({ fileName });
 
 	switch (extension) {
+		case "vtt":
+			return {
+				captions: parseVttSubtitles({ text: input }),
+				skippedCueCount: 0,
+				warnings: [],
+			};
 		case "srt":
 			return parseSrt({ input });
 		case "ass":

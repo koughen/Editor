@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+cargo build -p audio-worklet --target wasm32-unknown-unknown --release
+cp target/wasm32-unknown-unknown/release/audio_worklet.wasm apps/web/public/audio/processor.wasm

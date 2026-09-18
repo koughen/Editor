@@ -88,6 +88,10 @@ export function buildSeparatedAudioElement({
 		trimEnd: sourceElement.trimEnd,
 		sourceDuration: sourceElement.sourceDuration,
 		volume: sourceElement.volume ?? DEFAULTS.element.volume,
+		fadeIn: sourceElement.fadeIn,
+		fadeInCurve: sourceElement.fadeInCurve,
+		fadeOutCurve: sourceElement.fadeOutCurve,
+		fadeOut: sourceElement.fadeOut,
 		muted: sourceElement.muted ?? false,
 		retime: sourceElement.retime
 			? {

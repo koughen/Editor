@@ -44,7 +44,7 @@ export function SnapIndicator({
 				zIndex: TIMELINE_LAYERS.snapIndicator,
 			}}
 		>
-			<div className={"bg-primary/40 h-full w-0.5 opacity-80"} />
+			<div className={"bg-primary h-full w-px"} />
 		</div>
 	);
 }

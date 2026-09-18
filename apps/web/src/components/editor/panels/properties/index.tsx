@@ -34,7 +34,7 @@ export function PropertiesPanel() {
 		return (
 			<div className="panel bg-background flex h-full flex-col items-center justify-center overflow-hidden rounded-sm border">
 				<p className="text-muted-foreground text-sm">
-					{selectedElements.length} elements selected.0
+					{selectedElements.length} elements selected.
 				</p>
 			</div>
 		);

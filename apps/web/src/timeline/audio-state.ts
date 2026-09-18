@@ -1,3 +1,4 @@
+import { audioCurvedFade } from "opencut-wasm";
 import { hasKeyframesForPath } from "@/animation/keyframe-query";
 import { resolveNumberAtTime } from "@/animation/values";
 import { VOLUME_DB_MAX, VOLUME_DB_MIN } from "./audio-constants";
@@ -26,10 +27,13 @@ export function hasAnimatedVolume({
 }: {
 	element: AudioCapableElement;
 }): boolean {
-	return hasKeyframesForPath({
-		animations: element.animations,
-		propertyPath: "volume",
-	});
+	return (
+		Boolean(element.fadeIn || element.fadeOut) ||
+		hasKeyframesForPath({
+			animations: element.animations,
+			propertyPath: "volume",
+		})
+	);
 }
 
 import { TICKS_PER_SECOND } from "@/wasm";
@@ -54,7 +58,17 @@ export function resolveEffectiveAudioGain({
 		localTime: Math.round(localTime * TICKS_PER_SECOND),
 	});
 
-	return dBToLinear(resolvedDb);
+	return (
+		dBToLinear(resolvedDb) *
+		audioCurvedFade(
+			localTime,
+			element.duration / TICKS_PER_SECOND,
+			element.fadeIn ?? 0,
+			element.fadeOut ?? 0,
+			element.fadeInCurve ?? "linear",
+			element.fadeOutCurve ?? "linear",
+		)
+	);
 }
 
 export function buildWaveformGainSamples({

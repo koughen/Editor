@@ -27,7 +27,7 @@ export function ReactMarkdownWrapper({
 				code: ({ className: codeClassName, children, ...props }) => (
 					<code
 						className={cn(
-							"rounded border border-destructive/20 bg-destructive/5 px-1.5 py-0.5 font-mono text-[0.85em] text-red-700 dark:text-red-300",
+							"rounded border border-destructive/20 bg-destructive/5 px-1.5 py-0.5 font-mono text-[0.85em] text-foreground",
 							codeClassName,
 						)}
 						{...props}

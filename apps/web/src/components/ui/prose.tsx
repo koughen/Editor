@@ -85,11 +85,17 @@ function renderHastNode({
 		renderHastNode({ node: childNode, key: `${key}-${index}` }),
 	);
 
-	return createElement(node.tagName, { ...toReactProps({ properties: node.properties }), key }, children);
+	return createElement(
+		node.tagName,
+		{ ...toReactProps({ properties: node.properties }), key },
+		children,
+	);
 }
 
 function renderHtmlNodes({ html }: { html: string }): React.ReactNode {
-	const rootNode = unified().use(rehypeParse, { fragment: true }).parse(html) as HastRootNode;
+	const rootNode = unified()
+		.use(rehypeParse, { fragment: true })
+		.parse(html) as HastRootNode;
 	return (rootNode.children ?? []).map((childNode, index) =>
 		renderHastNode({ node: childNode, key: `prose-node-${index}` }),
 	);
@@ -99,7 +105,7 @@ function Prose({ children, html, className }: ProseProps) {
 	return (
 		<article
 			className={cn(
-				"prose prose-h2:font-semibold prose-h1:text-xl prose-a:text-blue-600 prose-p:first:mt-0 dark:prose-invert mx-auto max-w-none px-2",
+				"prose prose-h2:font-semibold prose-h1:text-xl prose-a:text-primary prose-p:first:mt-0 dark:prose-invert mx-auto max-w-none px-2",
 				className,
 			)}
 		>

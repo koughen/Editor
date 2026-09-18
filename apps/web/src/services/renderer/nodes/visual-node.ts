@@ -6,6 +6,7 @@ import type { RetimeConfig, VisualElement } from "@/timeline";
 
 export interface VisualNodeParams {
 	duration: number;
+	contentDuration?: number;
 	timeOffset: number;
 	trimStart: number;
 	trimEnd: number;
